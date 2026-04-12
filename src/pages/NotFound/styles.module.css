@@ -1,0 +1,17 @@
+.wrapper {
+  min-height: 40vh;
+  display: grid;
+  place-content: center;
+  gap: 0.6rem;
+  text-align: center;
+}
+
+.wrapper h1,
+.wrapper p {
+  margin: 0;
+}
+
+.wrapper a {
+  color: var(--primary);
+  font-weight: 600;
+}

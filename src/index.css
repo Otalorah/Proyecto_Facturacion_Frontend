@@ -1,0 +1,30 @@
+:root {
+  --bg: #f7f4ef;
+  --surface: #ffffff;
+  --surface-soft: #f3ede4;
+  --text: #24201a;
+  --text-soft: #685d50;
+  --line: #ded3c2;
+  --primary: #b4511f;
+  --primary-strong: #8a3f18;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: radial-gradient(circle at top right, #efe4d3 0%, var(--bg) 45%);
+  color: var(--text);
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  line-height: 1.5;
+}
+
+a {
+  color: inherit;
+}
+
+#root {
+  min-height: 100vh;
+}

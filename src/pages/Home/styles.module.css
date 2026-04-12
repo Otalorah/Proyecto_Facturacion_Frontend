@@ -1,0 +1,28 @@
+.wrapper {
+  display: grid;
+  gap: 1rem;
+}
+
+.wrapper h1 {
+  margin: 0;
+  font-size: clamp(1.4rem, 3.6vw, 2rem);
+}
+
+.wrapper p {
+  margin: 0;
+  color: var(--text-soft);
+}
+
+.card {
+  background: var(--surface-soft);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  padding: 1rem;
+  display: grid;
+  gap: 0.8rem;
+  max-width: 420px;
+}
+
+.card label {
+  font-weight: 600;
+}
