@@ -1,33 +1,405 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import Button from '../../components/ui/Button'
 import Input from '../../components/ui/Input'
 import { useDocumentTitle } from '../../hooks/useDocumentTitle'
+import {
+   createProduct,
+   deleteProduct,
+   listProducts,
+   updateProduct,
+} from '../../services/products-service'
 import styles from './styles.module.css'
 
 function HomePage() {
-  const [companyName, setCompanyName] = useState('')
-  useDocumentTitle('Inicio')
+   useDocumentTitle('Dashboard de productos')
 
-   const greeting = useMemo(() => {
-      if (!companyName.trim()) return 'Tu panel base esta listo.'
-      return `Bienvenido, ${companyName.trim()}.`
-   }, [companyName])
+   const [products, setProducts] = useState([])
+   const [total, setTotal] = useState(0)
+   const [page, setPage] = useState(1)
+   const pageSize = 10
+
+   const [searchInput, setSearchInput] = useState('')
+   const [searchQuery, setSearchQuery] = useState('')
+
+   const [isLoading, setIsLoading] = useState(false)
+   const [listError, setListError] = useState('')
+
+   const [isModalOpen, setIsModalOpen] = useState(false)
+   const [editingProduct, setEditingProduct] = useState(null)
+   const [isSubmitting, setIsSubmitting] = useState(false)
+   const [submitError, setSubmitError] = useState('')
+   const [validationErrors, setValidationErrors] = useState({})
+
+   const [formValues, setFormValues] = useState({
+      name: '',
+      sku: '',
+      price: '',
+      stock: '',
+   })
+
+   const totalPages = useMemo(() => {
+      const pages = Math.ceil(total / pageSize)
+      return pages > 0 ? pages : 1
+   }, [total])
+
+   useEffect(() => {
+      let isMounted = true
+
+      async function loadProducts() {
+         setIsLoading(true)
+         setListError('')
+
+         try {
+            const response = await listProducts({
+               page,
+               size: pageSize,
+               search: searchQuery,
+            })
+
+            if (!isMounted) {
+               return
+            }
+
+            setProducts(response.items)
+            setTotal(response.total)
+         } catch (error) {
+            if (!isMounted) {
+               return
+            }
+
+            setListError(error.message || 'No se pudieron cargar los productos.')
+         } finally {
+            if (isMounted) {
+               setIsLoading(false)
+            }
+         }
+      }
+
+      loadProducts()
+
+      return () => {
+         isMounted = false
+      }
+   }, [page, pageSize, searchQuery])
+
+   function extractValidationErrors(error) {
+      const details = error?.details || {}
+      const map = {}
+
+      const groups = [details.errors, details.violations, details.validationErrors]
+
+      for (const group of groups) {
+         if (Array.isArray(group)) {
+            for (const item of group) {
+               const field = item?.field || item?.path
+               const message = item?.message || item?.defaultMessage
+
+               if (field && message) {
+                  map[field] = message
+               }
+            }
+         } else if (group && typeof group === 'object') {
+            for (const [field, message] of Object.entries(group)) {
+               map[field] = Array.isArray(message) ? message[0] : String(message)
+            }
+         }
+      }
+
+      return map
+   }
+
+   function openCreateModal() {
+      setEditingProduct(null)
+      setFormValues({
+         name: '',
+         sku: '',
+         price: '',
+         stock: '',
+      })
+      setSubmitError('')
+      setValidationErrors({})
+      setIsModalOpen(true)
+   }
+
+   function openEditModal(product) {
+      setEditingProduct(product)
+      setFormValues({
+         name: product.name,
+         sku: product.sku,
+         price: String(product.price),
+         stock: String(product.stock),
+      })
+      setSubmitError('')
+      setValidationErrors({})
+      setIsModalOpen(true)
+   }
+
+   function closeModal() {
+      if (isSubmitting) {
+         return
+      }
+
+      setIsModalOpen(false)
+   }
+
+   function handleChangeField(event) {
+      const { name, value } = event.target
+      setFormValues((prev) => ({ ...prev, [name]: value }))
+      setValidationErrors((prev) => ({ ...prev, [name]: '' }))
+   }
+
+   async function loadCurrentPage() {
+      const response = await listProducts({
+         page,
+         size: pageSize,
+         search: searchQuery,
+      })
+
+      setProducts(response.items)
+      setTotal(response.total)
+   }
+
+   async function handleSubmitProduct(event) {
+      event.preventDefault()
+      setIsSubmitting(true)
+      setSubmitError('')
+      setValidationErrors({})
+
+      const payload = {
+         name: formValues.name.trim(),
+         sku: formValues.sku.trim(),
+         price: Number(formValues.price),
+         stock: Number(formValues.stock),
+      }
+
+      try {
+         if (editingProduct) {
+            await updateProduct(editingProduct.id, payload)
+         } else {
+            await createProduct(payload)
+         }
+
+         setIsModalOpen(false)
+         await loadCurrentPage()
+      } catch (error) {
+         const backendFieldErrors = extractValidationErrors(error)
+
+         if (Object.keys(backendFieldErrors).length > 0) {
+            setValidationErrors(backendFieldErrors)
+         } else {
+            setSubmitError(error.message || 'No se pudo guardar el producto.')
+         }
+      } finally {
+         setIsSubmitting(false)
+      }
+   }
+
+   async function handleDelete(product) {
+      const approved = window.confirm(
+         `Se eliminara el producto "${product.name}". Esta accion no se puede deshacer.`,
+      )
+
+      if (!approved) {
+         return
+      }
+
+      try {
+         await deleteProduct(product.id)
+
+         if (products.length === 1 && page > 1) {
+            setPage((prev) => prev - 1)
+            return
+         }
+
+         await loadCurrentPage()
+      } catch (error) {
+         setListError(error.message || 'No se pudo eliminar el producto.')
+      }
+   }
+
+   function handleSearchSubmit(event) {
+      event.preventDefault()
+      setPage(1)
+      setSearchQuery(searchInput.trim())
+   }
+
+   const modalTitle = editingProduct ? 'Editar producto' : 'Crear producto'
 
    return (
       <section className={styles.wrapper}>
-      <h1>Inicio</h1>
-      <p>{greeting}</p>
+         <div className={styles.headerRow}>
+            <div>
+               <h1>Productos</h1>
+               <p>Gestiona inventario con busqueda, paginacion y acciones CRUD.</p>
+            </div>
+            <Button type="button" onClick={openCreateModal}>
+               Nuevo producto
+            </Button>
+         </div>
 
-      <div className={styles.card}>
-         <label htmlFor="companyName">Nombre de la empresa</label>
-         <Input
-            id="companyName"
-            value={companyName}
-            onChange={(event) => setCompanyName(event.target.value)}
-            placeholder="Ej. Facturacion El Sol"
-         />
-         <Button type="button">Guardar borrador</Button>
-      </div>
+         <form className={styles.searchRow} onSubmit={handleSearchSubmit}>
+            <Input
+               type="search"
+               value={searchInput}
+               onChange={(event) => setSearchInput(event.target.value)}
+               placeholder="Buscar por nombre o SKU"
+               aria-label="Buscar productos"
+            />
+            <Button type="submit" variant="secondary">
+               Buscar
+            </Button>
+         </form>
+
+         {listError ? <p className={styles.error}>{listError}</p> : null}
+
+         <div className={styles.tableWrap}>
+            <table className={styles.table}>
+               <thead>
+                  <tr>
+                     <th>Nombre</th>
+                     <th>SKU</th>
+                     <th>Precio</th>
+                     <th>Stock</th>
+                     <th>Acciones</th>
+                  </tr>
+               </thead>
+               <tbody>
+                  {isLoading ? (
+                     <tr>
+                        <td colSpan="5" className={styles.emptyCell}>
+                           Cargando productos...
+                        </td>
+                     </tr>
+                  ) : null}
+
+                  {!isLoading && products.length === 0 ? (
+                     <tr>
+                        <td colSpan="5" className={styles.emptyCell}>
+                           No hay productos para mostrar.
+                        </td>
+                     </tr>
+                  ) : null}
+
+                  {!isLoading
+                     ? products.map((product) => (
+                        <tr key={product.id}>
+                           <td>{product.name}</td>
+                           <td>{product.sku}</td>
+                           <td>
+                              {new Intl.NumberFormat('es-CO', {
+                                 style: 'currency',
+                                 currency: 'COP',
+                                 maximumFractionDigits: 0,
+                              }).format(product.price)}
+                           </td>
+                           <td>{product.stock}</td>
+                           <td>
+                              <div className={styles.actionsCell}>
+                                 <Button type="button" variant="secondary" onClick={() => openEditModal(product)}>
+                                    Editar
+                                 </Button>
+                                 <Button type="button" onClick={() => handleDelete(product)}>
+                                    Eliminar
+                                 </Button>
+                              </div>
+                           </td>
+                        </tr>
+                     ))
+                     : null}
+               </tbody>
+            </table>
+         </div>
+
+         <div className={styles.pagination}>
+            <Button
+               type="button"
+               variant="secondary"
+               disabled={page <= 1 || isLoading}
+               onClick={() => setPage((prev) => Math.max(1, prev - 1))}
+            >
+               Anterior
+            </Button>
+            <span>
+               Pagina {page} de {totalPages}
+            </span>
+            <Button
+               type="button"
+               variant="secondary"
+               disabled={page >= totalPages || isLoading}
+               onClick={() => setPage((prev) => Math.min(totalPages, prev + 1))}
+            >
+               Siguiente
+            </Button>
+         </div>
+
+         {isModalOpen ? (
+            <div className={styles.modalOverlay} role="dialog" aria-modal="true" aria-label={modalTitle}>
+               <div className={styles.modalCard}>
+                  <h2>{modalTitle}</h2>
+
+                  <form className={styles.modalForm} onSubmit={handleSubmitProduct}>
+                     <label htmlFor="name">Nombre</label>
+                     <Input
+                        id="name"
+                        name="name"
+                        value={formValues.name}
+                        onChange={handleChangeField}
+                        placeholder="Ej. Cuaderno A4"
+                        required
+                     />
+                     {validationErrors.name ? <p className={styles.fieldError}>{validationErrors.name}</p> : null}
+
+                     <label htmlFor="sku">SKU</label>
+                     <Input
+                        id="sku"
+                        name="sku"
+                        value={formValues.sku}
+                        onChange={handleChangeField}
+                        placeholder="PROD-001"
+                        required
+                     />
+                     {validationErrors.sku ? <p className={styles.fieldError}>{validationErrors.sku}</p> : null}
+
+                     <label htmlFor="price">Precio</label>
+                     <Input
+                        id="price"
+                        name="price"
+                        type="number"
+                        min="0"
+                        value={formValues.price}
+                        onChange={handleChangeField}
+                        placeholder="0"
+                        required
+                     />
+                     {validationErrors.price ? <p className={styles.fieldError}>{validationErrors.price}</p> : null}
+
+                     <label htmlFor="stock">Stock</label>
+                     <Input
+                        id="stock"
+                        name="stock"
+                        type="number"
+                        min="0"
+                        value={formValues.stock}
+                        onChange={handleChangeField}
+                        placeholder="0"
+                        required
+                     />
+                     {validationErrors.stock ? <p className={styles.fieldError}>{validationErrors.stock}</p> : null}
+
+                     {submitError ? <p className={styles.error}>{submitError}</p> : null}
+
+                     <div className={styles.modalActions}>
+                        <Button type="button" variant="secondary" onClick={closeModal} disabled={isSubmitting}>
+                           Cancelar
+                        </Button>
+                        <Button type="submit" disabled={isSubmitting}>
+                           {isSubmitting ? 'Guardando...' : 'Guardar'}
+                        </Button>
+                     </div>
+                  </form>
+               </div>
+            </div>
+         ) : null}
       </section>
    )
 }
