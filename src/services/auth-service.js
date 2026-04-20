@@ -1,10 +1,11 @@
 import { apiClient } from './apiClient'
+import { USE_MOCK_API } from '../config/feature-flags'
 
 function extractToken(payload) {
    return payload?.token || payload?.jwt || payload?.accessToken || ''
 }
 
-const MOCK_AUTH = true
+const MOCK_AUTH = USE_MOCK_API
 
 function wait(ms) {
    return new Promise((resolve) => {

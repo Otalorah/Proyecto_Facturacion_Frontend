@@ -27,15 +27,21 @@ export async function apiClient(path, options = {}) {
 
    if (!response.ok) {
       let message = `HTTP ${response.status}`
+      let errorDetails = null
 
       try {
          const errorPayload = await response.json()
+         errorDetails = errorPayload
          message = errorPayload?.message || message
       } catch {
          // Keep fallback message when response has no JSON payload.
       }
 
-      throw new Error(message)
+      const error = new Error(message)
+      error.name = 'ApiError'
+      error.status = response.status
+      error.details = errorDetails
+      throw error
    }
 
    const contentType = response.headers.get('content-type') || ''

@@ -47,10 +47,14 @@ src/
 ## Variables de entorno
 
 1. Copiar `.env.example` a `.env`.
-2. Ajustar el valor de `VITE_API_URL`.
+2. Ajustar los valores de `VITE_API_URL` y `VITE_USE_MOCK_API`.
 
 Ejemplo:
 
 ```env
 VITE_API_URL=http://localhost:3000
-``
+VITE_USE_MOCK_API=true
+```
+
+- `VITE_USE_MOCK_API=true`: usa mocks locales para auth y productos.
+- `VITE_USE_MOCK_API=false`: usa backend real.
