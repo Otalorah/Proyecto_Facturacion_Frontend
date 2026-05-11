@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useState, type ChangeEvent, type FormEvent } from 'react'
 import Button from '../../components/ui/Button'
 import Input from '../../components/ui/Input'
 import { useDocumentTitle } from '../../hooks/useDocumentTitle'
@@ -7,13 +7,15 @@ import {
    deleteProduct,
    listProducts,
    updateProduct,
+   type Product,
+   type ProductInput,
 } from '../../services/products-service'
 import styles from './styles.module.css'
 
 function HomePage() {
    useDocumentTitle('Dashboard de productos')
 
-   const [products, setProducts] = useState([])
+   const [products, setProducts] = useState<Product[]>([])
    const [total, setTotal] = useState(0)
    const [page, setPage] = useState(1)
    const pageSize = 10
@@ -25,12 +27,19 @@ function HomePage() {
    const [listError, setListError] = useState('')
 
    const [isModalOpen, setIsModalOpen] = useState(false)
-   const [editingProduct, setEditingProduct] = useState(null)
+   const [editingProduct, setEditingProduct] = useState<Product | null>(null)
    const [isSubmitting, setIsSubmitting] = useState(false)
    const [submitError, setSubmitError] = useState('')
-   const [validationErrors, setValidationErrors] = useState({})
+   const [validationErrors, setValidationErrors] = useState<Record<string, string>>({})
 
-   const [formValues, setFormValues] = useState({
+   type FormValues = {
+      name: string
+      sku: string
+      price: string
+      stock: string
+   }
+
+   const [formValues, setFormValues] = useState<FormValues>({
       name: '',
       sku: '',
       price: '',
@@ -82,20 +91,20 @@ function HomePage() {
       }
    }, [page, pageSize, searchQuery])
 
-   function extractValidationErrors(error) {
-      const details = error?.details || {}
-      const map = {}
+   function extractValidationErrors(error: unknown): Record<string, string> {
+      const details = (error as { details?: unknown })?.details ?? {}
+      const map: Record<string, string> = {}
 
       const groups = [details.errors, details.violations, details.validationErrors]
 
       for (const group of groups) {
          if (Array.isArray(group)) {
             for (const item of group) {
-               const field = item?.field || item?.path
-               const message = item?.message || item?.defaultMessage
+               const field = (item as Record<string, unknown>)?.field || (item as Record<string, unknown>)?.path
+               const message = (item as Record<string, unknown>)?.message || (item as Record<string, unknown>)?.defaultMessage
 
                if (field && message) {
-                  map[field] = message
+                  map[String(field)] = String(message)
                }
             }
          } else if (group && typeof group === 'object') {
@@ -121,7 +130,7 @@ function HomePage() {
       setIsModalOpen(true)
    }
 
-   function openEditModal(product) {
+   function openEditModal(product: Product) {
       setEditingProduct(product)
       setFormValues({
          name: product.name,
@@ -142,7 +151,7 @@ function HomePage() {
       setIsModalOpen(false)
    }
 
-   function handleChangeField(event) {
+   function handleChangeField(event: ChangeEvent<HTMLInputElement>) {
       const { name, value } = event.target
       setFormValues((prev) => ({ ...prev, [name]: value }))
       setValidationErrors((prev) => ({ ...prev, [name]: '' }))
@@ -159,13 +168,13 @@ function HomePage() {
       setTotal(response.total)
    }
 
-   async function handleSubmitProduct(event) {
+   async function handleSubmitProduct(event: FormEvent<HTMLFormElement>) {
       event.preventDefault()
       setIsSubmitting(true)
       setSubmitError('')
       setValidationErrors({})
 
-      const payload = {
+      const payload: ProductInput = {
          name: formValues.name.trim(),
          sku: formValues.sku.trim(),
          price: Number(formValues.price),
@@ -194,7 +203,7 @@ function HomePage() {
       }
    }
 
-   async function handleDelete(product) {
+   async function handleDelete(product: Product) {
       const approved = window.confirm(
          `Se eliminara el producto "${product.name}". Esta accion no se puede deshacer.`,
       )
@@ -217,7 +226,7 @@ function HomePage() {
       }
    }
 
-   function handleSearchSubmit(event) {
+   function handleSearchSubmit(event: FormEvent<HTMLFormElement>) {
       event.preventDefault()
       setPage(1)
       setSearchQuery(searchInput.trim())

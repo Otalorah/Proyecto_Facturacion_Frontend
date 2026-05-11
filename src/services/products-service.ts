@@ -1,4 +1,4 @@
-import { apiClient } from './apiClient'
+import { apiClient, type ApiError } from './apiClient'
 import { USE_MOCK_API } from '../config/feature-flags'
 
 const MOCK_PRODUCTS = USE_MOCK_API
@@ -6,7 +6,35 @@ const MOCK_LATENCY_MS = 450
 const MOCK_PRODUCTS_KEY = 'mock.products.items'
 const MOCK_NEXT_ID_KEY = 'mock.products.nextId'
 
-const MOCK_SEED_PRODUCTS = [
+export type Product = {
+   id: string
+   name: string
+   sku: string
+   price: number
+   stock: number
+}
+
+export type ProductInput = {
+   name: string
+   sku: string
+   price: number
+   stock: number
+}
+
+export type ListProductsParams = {
+   page?: number
+   size?: number
+   search?: string
+}
+
+export type ListProductsResult = {
+   items: Product[]
+   total: number
+   page: number
+   size: number
+}
+
+const MOCK_SEED_PRODUCTS: Product[] = [
    { id: '1', name: 'Cuaderno A4', sku: 'PROD-001', price: 12500, stock: 22 },
    { id: '2', name: 'Lapicero Azul', sku: 'PROD-002', price: 2500, stock: 140 },
    { id: '3', name: 'Lapicero Negro', sku: 'PROD-003', price: 2500, stock: 115 },
@@ -24,12 +52,12 @@ const MOCK_SEED_PRODUCTS = [
    { id: '15', name: 'Cinta Transparente', sku: 'PROD-015', price: 3700, stock: 52 },
 ]
 
-function toNumber(value, fallback = 0) {
+function toNumber(value: unknown, fallback = 0) {
    const num = Number(value)
    return Number.isFinite(num) ? num : fallback
 }
 
-function mapProduct(raw) {
+function mapProduct(raw: Record<string, unknown> | null | undefined): Product {
    if (!raw) {
       return {
          id: '',
@@ -41,29 +69,29 @@ function mapProduct(raw) {
    }
 
    return {
-      id: raw.id ?? raw.productId ?? '',
-      name: raw.name ?? raw.nombre ?? '',
-      sku: raw.sku ?? raw.code ?? '',
+      id: String(raw.id ?? raw.productId ?? ''),
+      name: String(raw.name ?? raw.nombre ?? ''),
+      sku: String(raw.sku ?? raw.code ?? ''),
       price: toNumber(raw.price ?? raw.precio, 0),
       stock: toNumber(raw.stock ?? raw.inventory ?? 0, 0),
    }
 }
 
-function wait(ms) {
+function wait(ms: number) {
    return new Promise((resolve) => {
       setTimeout(resolve, ms)
    })
 }
 
-function createApiError({ message, status = 400, details = null }) {
-   const error = new Error(message)
+function createApiError({ message, status = 400, details = null }: { message: string; status?: number; details?: unknown }): ApiError {
+   const error = new Error(message) as ApiError
    error.name = 'ApiError'
    error.status = status
    error.details = details
    return error
 }
 
-function readMockProducts() {
+function readMockProducts(): Product[] {
    const stored = localStorage.getItem(MOCK_PRODUCTS_KEY)
 
    if (!stored) {
@@ -73,11 +101,11 @@ function readMockProducts() {
    }
 
    try {
-      const parsed = JSON.parse(stored)
+      const parsed = JSON.parse(stored) as unknown
       if (!Array.isArray(parsed)) {
          throw new Error('Invalid mock data')
       }
-      return parsed.map(mapProduct)
+      return parsed.map((item) => mapProduct(item as Record<string, unknown>))
    } catch {
       localStorage.setItem(MOCK_PRODUCTS_KEY, JSON.stringify(MOCK_SEED_PRODUCTS))
       localStorage.setItem(MOCK_NEXT_ID_KEY, String(MOCK_SEED_PRODUCTS.length + 1))
@@ -85,7 +113,7 @@ function readMockProducts() {
    }
 }
 
-function writeMockProducts(items) {
+function writeMockProducts(items: Product[]) {
    localStorage.setItem(MOCK_PRODUCTS_KEY, JSON.stringify(items))
 }
 
@@ -96,7 +124,7 @@ function getNextMockId() {
    return String(next)
 }
 
-function normalizeProductInput(data) {
+function normalizeProductInput(data: ProductInput): ProductInput {
    return {
       name: String(data?.name || '').trim(),
       sku: String(data?.sku || '').trim(),
@@ -105,9 +133,13 @@ function normalizeProductInput(data) {
    }
 }
 
-function validateProductInput(data, existingItems, currentId = null) {
+function validateProductInput(
+   data: ProductInput,
+   existingItems: Product[],
+   currentId: string | null = null,
+): ProductInput {
    const product = normalizeProductInput(data)
-   const fieldErrors = {}
+   const fieldErrors: Record<string, string> = {}
 
    if (!product.name) {
       fieldErrors.name = 'El nombre es obligatorio.'
@@ -150,9 +182,13 @@ function validateProductInput(data, existingItems, currentId = null) {
    return product
 }
 
-function normalizeListPayload(payload, fallbackPage, fallbackSize) {
+function normalizeListPayload(
+   payload: unknown,
+   fallbackPage: number,
+   fallbackSize: number,
+): ListProductsResult {
    if (Array.isArray(payload)) {
-      const items = payload.map(mapProduct)
+      const items = payload.map((item) => mapProduct(item as Record<string, unknown>))
 
       return {
          items,
@@ -162,23 +198,24 @@ function normalizeListPayload(payload, fallbackPage, fallbackSize) {
       }
    }
 
+   const typedPayload = payload as Record<string, unknown> | null
    const candidates = [
-      payload,
-      payload?.data,
-      payload?.result,
+      typedPayload,
+      (typedPayload?.data as Record<string, unknown> | null) ?? null,
+      (typedPayload?.result as Record<string, unknown> | null) ?? null,
    ]
 
    for (const candidate of candidates) {
       if (!candidate) continue
 
-      const rawItems = candidate.items || candidate.content || candidate.rows
+      const rawItems = (candidate.items || candidate.content || candidate.rows) as unknown
 
       if (Array.isArray(rawItems)) {
          return {
-            items: rawItems.map(mapProduct),
-            total: toNumber(candidate.total ?? candidate.totalElements, rawItems.length),
-            page: toNumber(candidate.page ?? candidate.number, fallbackPage),
-            size: toNumber(candidate.size, fallbackSize),
+            items: rawItems.map((item: Record<string, unknown>) => mapProduct(item)),
+            total: toNumber((candidate as Record<string, unknown>).total ?? (candidate as Record<string, unknown>).totalElements, rawItems.length),
+            page: toNumber((candidate as Record<string, unknown>).page ?? (candidate as Record<string, unknown>).number, fallbackPage),
+            size: toNumber((candidate as Record<string, unknown>).size, fallbackSize),
          }
       }
    }
@@ -191,7 +228,9 @@ function normalizeListPayload(payload, fallbackPage, fallbackSize) {
    }
 }
 
-export async function listProducts({ page = 1, size = 10, search = '' } = {}) {
+export async function listProducts(
+   { page = 1, size = 10, search = '' }: ListProductsParams = {},
+): Promise<ListProductsResult> {
    if (MOCK_PRODUCTS) {
       await wait(MOCK_LATENCY_MS)
 
@@ -229,11 +268,11 @@ export async function listProducts({ page = 1, size = 10, search = '' } = {}) {
       params.set('search', search.trim())
    }
 
-   const payload = await apiClient(`/products?${params.toString()}`)
+   const payload = await apiClient<ListProductsResult | Record<string, unknown>>(`/products?${params.toString()}`)
    return normalizeListPayload(payload, page, size)
 }
 
-export async function createProduct(data) {
+export async function createProduct(data: ProductInput): Promise<Product> {
    if (MOCK_PRODUCTS) {
       await wait(MOCK_LATENCY_MS)
 
@@ -249,7 +288,7 @@ export async function createProduct(data) {
       return mapProduct(created)
    }
 
-   const payload = await apiClient('/products', {
+   const payload = await apiClient<Record<string, unknown>>('/products', {
       method: 'POST',
       body: JSON.stringify(data),
    })
@@ -257,7 +296,7 @@ export async function createProduct(data) {
    return mapProduct(payload?.data || payload)
 }
 
-export async function updateProduct(id, data) {
+export async function updateProduct(id: string, data: ProductInput): Promise<Product> {
    if (MOCK_PRODUCTS) {
       await wait(MOCK_LATENCY_MS)
 
@@ -284,7 +323,7 @@ export async function updateProduct(id, data) {
       return mapProduct(updated)
    }
 
-   const payload = await apiClient(`/products/${id}`, {
+   const payload = await apiClient<Record<string, unknown>>(`/products/${id}`, {
       method: 'PUT',
       body: JSON.stringify(data),
    })
@@ -292,7 +331,7 @@ export async function updateProduct(id, data) {
    return mapProduct(payload?.data || payload)
 }
 
-export async function deleteProduct(id) {
+export async function deleteProduct(id: string): Promise<void> {
    if (MOCK_PRODUCTS) {
       await wait(MOCK_LATENCY_MS)
 

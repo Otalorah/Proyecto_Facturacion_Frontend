@@ -1,17 +1,21 @@
-import { useCallback, useEffect, useMemo, useState } from 'react'
-import { AuthContext } from './auth-context'
+import { useCallback, useEffect, useMemo, useState, type ReactNode } from 'react'
+import { AuthContext, type AuthContextValue } from './auth-context'
 import { setApiAuthToken } from '../services/apiClient'
 
 const AUTH_TOKEN_KEY = 'auth.jwt'
 
-export function AuthProvider({ children }) {
-   const [token, setToken] = useState(() => localStorage.getItem(AUTH_TOKEN_KEY) || '')
+type AuthProviderProps = {
+   children: ReactNode
+}
+
+export function AuthProvider({ children }: AuthProviderProps) {
+   const [token, setToken] = useState<string>(() => localStorage.getItem(AUTH_TOKEN_KEY) || '')
 
    useEffect(() => {
       setApiAuthToken(token)
    }, [token])
 
-   const persistToken = useCallback((nextToken) => {
+   const persistToken = useCallback((nextToken: string) => {
       if (!nextToken) {
          localStorage.removeItem(AUTH_TOKEN_KEY)
          setToken('')
@@ -26,7 +30,7 @@ export function AuthProvider({ children }) {
       persistToken('')
    }, [persistToken])
 
-   const value = useMemo(
+   const value = useMemo<AuthContextValue>(
       () => ({
          token,
          isAuthenticated: Boolean(token),

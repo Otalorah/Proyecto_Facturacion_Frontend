@@ -1,4 +1,4 @@
-function toBooleanEnv(value, fallback = false) {
+function toBooleanEnv(value: unknown, fallback = false) {
    if (value === undefined || value === null || String(value).trim() === '') {
       return fallback
    }

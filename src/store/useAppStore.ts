@@ -1,7 +1,7 @@
 import { useContext } from 'react'
-import { AppStoreContext } from './app-store-context'
+import { AppStoreContext, type AppStoreContextValue } from './app-store-context'
 
-export function useAppStore() {
+export function useAppStore(): AppStoreContextValue {
    const context = useContext(AppStoreContext)
 
    if (!context) {

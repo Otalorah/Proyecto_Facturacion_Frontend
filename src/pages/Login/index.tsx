@@ -1,47 +1,43 @@
-import { useState } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { useState, type FormEvent } from 'react'
+import { Link, useLocation, useNavigate } from 'react-router-dom'
 import Button from '../../components/ui/Button'
 import Input from '../../components/ui/Input'
 import { useDocumentTitle } from '../../hooks/useDocumentTitle'
 import { useAuth } from '../../auth/useAuth'
-import { registerRequest } from '../../services/auth-service'
+import { loginRequest } from '../../services/auth-service'
 import styles from './styles.module.css'
 
-function RegisterPage() {
-   useDocumentTitle('Registro')
+function LoginPage() {
+   useDocumentTitle('Iniciar sesion')
 
    const navigate = useNavigate()
+   const location = useLocation()
    const { setAuthToken } = useAuth()
 
-   const [name, setName] = useState('')
    const [email, setEmail] = useState('')
    const [password, setPassword] = useState('')
-   const [confirmPassword, setConfirmPassword] = useState('')
    const [error, setError] = useState('')
    const [isSubmitting, setIsSubmitting] = useState(false)
 
-   async function handleSubmit(event) {
+   const destination = location.state?.from?.pathname || '/dashboard'
+
+   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
       event.preventDefault()
       setError('')
-
-      if (password !== confirmPassword) {
-         setError('Las contrasenas no coinciden.')
-         return
-      }
-
       setIsSubmitting(true)
 
       try {
-         const { token } = await registerRequest({ name, email, password })
+         const { token } = await loginRequest({ email, password })
 
          if (!token) {
             throw new Error('La respuesta no incluye token JWT.')
          }
 
          setAuthToken(token)
-         navigate('/dashboard', { replace: true })
+         navigate(destination, { replace: true })
       } catch (requestError) {
-         setError(requestError.message || 'No se pudo completar el registro.')
+         const message = (requestError as { message?: string })?.message
+         setError(message || 'No se pudo iniciar sesion.')
       } finally {
          setIsSubmitting(false)
       }
@@ -49,20 +45,10 @@ function RegisterPage() {
 
    return (
       <section className={styles.wrapper}>
-         <h1>Crear cuenta</h1>
-         <p>Registra tu empresa y empieza a facturar.</p>
+         <h1>Iniciar sesion</h1>
+         <p>Accede para gestionar productos e inventario.</p>
 
          <form className={styles.form} onSubmit={handleSubmit}>
-            <label htmlFor="name">Nombre</label>
-            <Input
-               id="name"
-               type="text"
-               value={name}
-               onChange={(event) => setName(event.target.value)}
-               placeholder="Tu nombre"
-               required
-            />
-
             <label htmlFor="email">Correo</label>
             <Input
                id="email"
@@ -78,20 +64,9 @@ function RegisterPage() {
             <Input
                id="password"
                type="password"
-               autoComplete="new-password"
+               autoComplete="current-password"
                value={password}
                onChange={(event) => setPassword(event.target.value)}
-               placeholder="********"
-               required
-            />
-
-            <label htmlFor="confirmPassword">Confirmar contrasena</label>
-            <Input
-               id="confirmPassword"
-               type="password"
-               autoComplete="new-password"
-               value={confirmPassword}
-               onChange={(event) => setConfirmPassword(event.target.value)}
                placeholder="********"
                required
             />
@@ -99,15 +74,15 @@ function RegisterPage() {
             {error ? <p className={styles.error}>{error}</p> : null}
 
             <Button type="submit" disabled={isSubmitting}>
-               {isSubmitting ? 'Creando cuenta...' : 'Registrarme'}
+               {isSubmitting ? 'Ingresando...' : 'Entrar'}
             </Button>
          </form>
 
          <p>
-            Ya tienes cuenta? <Link to="/login">Inicia sesion</Link>
+            No tienes cuenta? <Link to="/register">Registrate</Link>
          </p>
       </section>
    )
 }
 
-export default RegisterPage
+export default LoginPage

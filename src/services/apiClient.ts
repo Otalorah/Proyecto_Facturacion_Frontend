@@ -1,16 +1,21 @@
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000'
+const API_URL = (import.meta.env.VITE_API_URL as string | undefined) || 'http://localhost:3000'
 
 let authToken = ''
 
-export function setApiAuthToken(token) {
+export type ApiError = Error & {
+   status?: number
+   details?: unknown
+}
+
+export function setApiAuthToken(token: string) {
    authToken = token || ''
 }
 
-function buildHeaders(extraHeaders = {}) {
+function buildHeaders(extraHeaders: Record<string, string> = {}) {
    const headers = {
       'Content-Type': 'application/json',
       ...extraHeaders,
-   }
+   } as Record<string, string>
 
    if (authToken) {
       headers.Authorization = `Bearer ${authToken}`
@@ -19,9 +24,12 @@ function buildHeaders(extraHeaders = {}) {
    return headers
 }
 
-export async function apiClient(path, options = {}) {
+export async function apiClient<T = unknown>(
+   path: string,
+   options: RequestInit = {},
+): Promise<T | null> {
    const response = await fetch(`${API_URL}${path}`, {
-      headers: buildHeaders(options.headers),
+      headers: buildHeaders((options as RequestInit & { headers?: Record<string, string> }).headers),
       ...options,
    })
 
@@ -37,7 +45,7 @@ export async function apiClient(path, options = {}) {
          // Keep fallback message when response has no JSON payload.
       }
 
-      const error = new Error(message)
+      const error = new Error(message) as ApiError
       error.name = 'ApiError'
       error.status = response.status
       error.details = errorDetails
@@ -47,7 +55,7 @@ export async function apiClient(path, options = {}) {
    const contentType = response.headers.get('content-type') || ''
 
    if (contentType.includes('application/json')) {
-      return response.json()
+      return response.json() as Promise<T>
    }
 
    return null
