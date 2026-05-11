@@ -1,18 +1,15 @@
 import { useState, type FormEvent } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import Button from '../../components/ui/Button'
-import Input from '../../components/ui/Input'
-import { useDocumentTitle } from '../../hooks/useDocumentTitle'
-import { useAuth } from '../../auth/useAuth'
-import { registerRequest } from '../../services/auth-service'
+import Button from '../../components/ui/Button.tsx'
+import Input from '../../components/ui/Input.tsx'
+import { useDocumentTitle } from '../../hooks/useDocumentTitle.ts'
+import { registerRequest } from '../../services/auth-service.ts'
 import styles from './styles.module.css'
 
 function RegisterPage() {
    useDocumentTitle('Registro')
 
    const navigate = useNavigate()
-   const { setAuthToken } = useAuth()
-
    const [name, setName] = useState('')
    const [email, setEmail] = useState('')
    const [password, setPassword] = useState('')
@@ -29,17 +26,16 @@ function RegisterPage() {
          return
       }
 
+      if (password.length < 8) {
+         setError('La contrasena debe tener al menos 8 caracteres.')
+         return
+      }
+
       setIsSubmitting(true)
 
       try {
-         const { token } = await registerRequest({ name, email, password })
-
-         if (!token) {
-            throw new Error('La respuesta no incluye token JWT.')
-         }
-
-         setAuthToken(token)
-         navigate('/dashboard', { replace: true })
+         await registerRequest({ name, email, password })
+         navigate('/login', { replace: true })
       } catch (requestError) {
          const message = (requestError as { message?: string })?.message
          setError(message || 'No se pudo completar el registro.')
