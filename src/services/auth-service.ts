@@ -1,5 +1,5 @@
-import { apiClient } from './apiClient.js'
-import { USE_MOCK_API } from '../config/feature-flags.js'
+import { apiClient } from './apiClient.ts'
+import { USE_MOCK_API } from '../config/feature-flags.ts'
 
 type AuthPayload = Record<string, unknown> & {
    token?: string
@@ -18,10 +18,12 @@ type RegisterCredentials = {
    password: string
 }
 
-type AuthResponse = {
-   token: string
-   payload: AuthPayload
-}
+type ApiResponse = {
+   success: boolean
+   message: string
+   data?: unknown
+   timestamp: string
+}  
 
 function extractToken(payload: AuthPayload) {
    return payload?.token || payload?.jwt || payload?.accessToken || ''
@@ -40,7 +42,7 @@ function buildMockToken(email: string) {
    return `mock-jwt.${btoa(raw)}.signature`
 }
 
-export async function loginRequest(credentials: LoginCredentials): Promise<AuthResponse> {
+export async function loginRequest(credentials: LoginCredentials): Promise<ApiResponse > {
    if (MOCK_AUTH) {
       await wait(700)
 
@@ -59,30 +61,26 @@ export async function loginRequest(credentials: LoginCredentials): Promise<AuthR
       }
 
       return {
-         token: extractToken(payload),
-         payload,
+         success: true,
+         message: 'Autenticacion simulada exitosa.',
+         data: payload,
+         timestamp: new Date().toISOString(),
       }
    }
 
-   const payload = await apiClient<AuthPayload>('/auth/login', {
+   const res = await apiClient<ApiResponse>('/api/v1/auth/login', {
       method: 'POST',
       body: JSON.stringify(credentials),
    })
 
-   return {
-      token: extractToken(payload || {}),
-      payload: payload || {},
-   }
+   return res
 }
 
-export async function registerRequest(data: RegisterCredentials): Promise<AuthResponse> {
-   const payload = await apiClient<AuthPayload>('/auth/register', {
+export async function registerRequest(data: RegisterCredentials): Promise<ApiResponse> {
+   const res = await apiClient<ApiResponse>('/api/v1/auth/register', {
       method: 'POST',
       body: JSON.stringify(data),
    })
 
-   return {
-      token: extractToken(payload || {}),
-      payload: payload || {},
-   }
+   return res
 }

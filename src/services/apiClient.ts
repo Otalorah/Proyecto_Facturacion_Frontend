@@ -27,7 +27,7 @@ function buildHeaders(extraHeaders: Record<string, string> = {}) {
 export async function apiClient<T = unknown>(
    path: string,
    options: RequestInit = {},
-): Promise<T | null> {
+): Promise<T> {
    const response = await fetch(`${API_URL}${path}`, {
       headers: buildHeaders((options as RequestInit & { headers?: Record<string, string> }).headers),
       ...options,
@@ -54,9 +54,5 @@ export async function apiClient<T = unknown>(
 
    const contentType = response.headers.get('content-type') || ''
 
-   if (contentType.includes('application/json')) {
-      return response.json() as Promise<T>
-   }
-
-   return null
+   return response.json() as Promise<T>
 }
