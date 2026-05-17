@@ -35,7 +35,6 @@ function ForgotPasswordPage() {
       <section className={styles.wrapper}>
          <div className={styles.panel}>
             <header className={styles.header}>
-               <span className={styles.badge}>Soporte de acceso</span>
                <h1>Recuperar contrasena</h1>
                <p>Enviaremos un enlace para restablecer el acceso.</p>
             </header>

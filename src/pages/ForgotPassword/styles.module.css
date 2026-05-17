@@ -21,25 +21,15 @@
   gap: 0.35rem;
 }
 
-.badge {
-  width: fit-content;
-  padding: 0.35rem 0.65rem;
-  border-radius: 999px;
-  font-size: 0.75rem;
-  letter-spacing: 0.12rem;
-  text-transform: uppercase;
-  color: var(--accent);
-  background: rgba(76, 194, 255, 0.12);
-  border: 1px solid rgba(76, 194, 255, 0.3);
-}
-
 .header h1 {
   margin: 0;
+  text-align: center;
   font-size: clamp(1.6rem, 2.8vw, 2rem);
 }
 
 .header p {
   margin: 0;
+  text-align: center;
   color: var(--text-soft);
 }
 
@@ -78,6 +68,7 @@
 .footer a {
   color: var(--accent);
   text-decoration: none;
+  text-align: center;
 }
 
 .footer a:hover {

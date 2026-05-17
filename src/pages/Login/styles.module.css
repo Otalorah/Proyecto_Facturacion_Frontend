@@ -35,17 +35,30 @@
 
 .header h1 {
    margin: 0;
+   text-align: center;
    font-size: clamp(1.6rem, 2.8vw, 2rem);
 }
 
 .header p {
    margin: 0;
+   text-align: center;
    color: var(--text-soft);
 }
 
 .form {
    display: grid;
    gap: 0.75rem;
+
+   a {
+      color: var(--accent);
+      text-decoration: none;
+      text-align: right;
+      font-size: 0.9rem;
+
+      &:hover {
+         text-decoration: underline;
+      }
+   }
 }
 
 .form label {
@@ -66,11 +79,17 @@
    gap: 0.45rem;
    color: var(--text-soft);
    font-size: 0.95rem;
+
+   span {
+      text-align: center;
+      font-size: medium;
+   }
 }
 
 .footer a {
    color: var(--accent);
    text-decoration: none;
+   text-align: center;
 }
 
 .footer a:hover {

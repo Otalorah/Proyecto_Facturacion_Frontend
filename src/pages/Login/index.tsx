@@ -26,7 +26,7 @@ function LoginPage() {
       try {
          const { data } = await loginRequest({ email, password })
 
-         if (!data.token) {
+         if (!data?.token) {
             throw new Error('La respuesta no incluye token JWT.')
          }
 
@@ -71,6 +71,7 @@ function LoginPage() {
                   placeholder="********"
                   required
                />
+               <Link to="/forgot-password">¿Olvidaste tu contrasena?</Link>
 
                {error ? <p className={styles.error}>{error}</p> : null}
 
@@ -81,9 +82,8 @@ function LoginPage() {
 
             <div className={styles.footer}>
                <span>
-                  No tienes cuenta? <Link to="/register">Registrate</Link>
+                  ¿No tienes cuenta? <Link to="/register">Registrate</Link>
                </span>
-               <Link to="/forgot-password">Olvidaste tu contrasena?</Link>
             </div>
          </div>
       </section>

@@ -106,7 +106,7 @@ function RegisterPage() {
 
             <div className={styles.footer}>
                <span>
-                  Ya tienes cuenta? <Link to="/login">Inicia sesion</Link>
+                  ¿Ya tienes cuenta? <Link to="/login">Inicia sesion</Link>
                </span>
             </div>
          </div>
