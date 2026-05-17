@@ -1,12 +1,22 @@
 :root {
-  --bg: #f7f4ef;
-  --surface: #ffffff;
-  --surface-soft: #f3ede4;
-  --text: #24201a;
-  --text-soft: #685d50;
-  --line: #ded3c2;
-  --primary: #b4511f;
-  --primary-strong: #8a3f18;
+  color-scheme: dark;
+  --bg: #0b111b;
+  --surface: #121a26;
+  --surface-soft: #101722;
+  --surface-strong: #182233;
+  --text: #e7eef7;
+  --text-soft: #9fb2c8;
+  --line: #223146;
+  --primary: #2f6fed;
+  --primary-strong: #1f4fb6;
+  --accent: #4cc2ff;
+  --accent-bg: #0e2236;
+  --accent-border: #2f6fed;
+  --border: #223146;
+  --text-h: #e7eef7;
+  --social-bg: #0f1c2b;
+  --shadow: 0 12px 30px rgba(7, 13, 23, 0.45);
+  --danger: #ff6b6b;
 }
 
 * {
@@ -15,14 +25,21 @@
 
 body {
   margin: 0;
-  background: radial-gradient(circle at top right, #efe4d3 0%, var(--bg) 45%);
+  background: radial-gradient(circle at top right, #16263d 0%, var(--bg) 48%),
+    linear-gradient(180deg, #0b111b 0%, #0c121d 100%);
   color: var(--text);
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  font-family: "IBM Plex Sans", "Source Sans 3", "Segoe UI", Tahoma, Geneva,
+    Verdana, sans-serif;
   line-height: 1.5;
 }
 
 a {
   color: inherit;
+}
+
+::selection {
+  background: rgba(47, 111, 237, 0.35);
+  color: #fff;
 }
 
 #root {

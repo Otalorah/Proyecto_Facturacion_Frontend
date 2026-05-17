@@ -48,7 +48,7 @@
 .table th {
   font-size: 0.92rem;
   color: var(--text-soft);
-  background: color-mix(in srgb, var(--surface-soft) 80%, #fff);
+  background: color-mix(in srgb, var(--surface) 80%, #000);
 }
 
 .table tbody tr:last-child td {
@@ -74,14 +74,14 @@
 
 .error {
   margin: 0;
-  color: #b42318;
+  color: var(--danger);
   font-size: 0.95rem;
 }
 
 .modalOverlay {
   position: fixed;
   inset: 0;
-  background: rgba(20, 15, 10, 0.55);
+  background: rgba(6, 10, 16, 0.7);
   display: grid;
   place-items: center;
   padding: 1rem;
@@ -90,7 +90,7 @@
 
 .modalCard {
   width: min(460px, 100%);
-  background: #fff;
+  background: var(--surface);
   border-radius: 14px;
   border: 1px solid var(--line);
   padding: 1rem;
@@ -113,7 +113,7 @@
 
 .fieldError {
   margin: 0;
-  color: #b42318;
+  color: var(--danger);
   font-size: 0.84rem;
 }
 

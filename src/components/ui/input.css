@@ -3,12 +3,13 @@
   border: 1px solid var(--line);
   border-radius: 10px;
   padding: 0.6rem 0.75rem;
-  background: #fff;
+  background: var(--surface-strong);
+  color: var(--text);
   font: inherit;
 }
 
 .ui-input:focus {
-  outline: 2px solid color-mix(in srgb, var(--primary) 45%, white);
+  outline: 2px solid color-mix(in srgb, var(--primary) 55%, white);
   outline-offset: 1px;
   border-color: var(--primary);
 }

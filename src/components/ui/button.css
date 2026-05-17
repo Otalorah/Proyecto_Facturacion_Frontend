@@ -21,6 +21,6 @@
 }
 
 .btn-secondary {
-  background: var(--surface-soft);
+  background: var(--surface-strong);
   color: var(--text);
 }
