@@ -46,63 +46,70 @@ function RegisterPage() {
 
    return (
       <section className={styles.wrapper}>
-         <h1>Crear cuenta</h1>
-         <p>Registra tu empresa y empieza a facturar.</p>
+         <div className={styles.panel}>
+            <header className={styles.header}>
+               <span className={styles.badge}>Alta de empresa</span>
+               <h1>Crear cuenta</h1>
+               <p>Registra tu empresa y empieza a facturar.</p>
+            </header>
 
-         <form className={styles.form} onSubmit={handleSubmit}>
-            <label htmlFor="name">Nombre</label>
-            <Input
-               id="name"
-               type="text"
-               value={name}
-               onChange={(event) => setName(event.target.value)}
-               placeholder="Tu nombre"
-               required
-            />
+            <form className={styles.form} onSubmit={handleSubmit}>
+               <label htmlFor="name">Nombre</label>
+               <Input
+                  id="name"
+                  type="text"
+                  value={name}
+                  onChange={(event) => setName(event.target.value)}
+                  placeholder="Tu nombre"
+                  required
+               />
 
-            <label htmlFor="email">Correo</label>
-            <Input
-               id="email"
-               type="email"
-               autoComplete="email"
-               value={email}
-               onChange={(event) => setEmail(event.target.value)}
-               placeholder="correo@empresa.com"
-               required
-            />
+               <label htmlFor="email">Correo</label>
+               <Input
+                  id="email"
+                  type="email"
+                  autoComplete="email"
+                  value={email}
+                  onChange={(event) => setEmail(event.target.value)}
+                  placeholder="correo@empresa.com"
+                  required
+               />
 
-            <label htmlFor="password">Contrasena</label>
-            <Input
-               id="password"
-               type="password"
-               autoComplete="new-password"
-               value={password}
-               onChange={(event) => setPassword(event.target.value)}
-               placeholder="********"
-               required
-            />
+               <label htmlFor="password">Contrasena</label>
+               <Input
+                  id="password"
+                  type="password"
+                  autoComplete="new-password"
+                  value={password}
+                  onChange={(event) => setPassword(event.target.value)}
+                  placeholder="********"
+                  required
+               />
 
-            <label htmlFor="confirmPassword">Confirmar contrasena</label>
-            <Input
-               id="confirmPassword"
-               type="password"
-               autoComplete="new-password"
-               value={confirmPassword}
-               onChange={(event) => setConfirmPassword(event.target.value)}
-               placeholder="********"
-               required
-            />
+               <label htmlFor="confirmPassword">Confirmar contrasena</label>
+               <Input
+                  id="confirmPassword"
+                  type="password"
+                  autoComplete="new-password"
+                  value={confirmPassword}
+                  onChange={(event) => setConfirmPassword(event.target.value)}
+                  placeholder="********"
+                  required
+               />
 
-            {error ? <p className={styles.error}>{error}</p> : null}
+               {error ? <p className={styles.error}>{error}</p> : null}
 
-            <Button type="submit" disabled={isSubmitting}>
-               {isSubmitting ? 'Creando cuenta...' : 'Registrarme'}
-            </Button>
-         </form>
+               <Button type="submit" disabled={isSubmitting}>
+                  {isSubmitting ? 'Creando cuenta...' : 'Registrarme'}
+               </Button>
+            </form>
 
-         <p>
-            Ya tienes cuenta? <Link to="/login">Inicia sesion</Link>
-         </p>
+            <div className={styles.footer}>
+               <span>
+                  Ya tienes cuenta? <Link to="/login">Inicia sesion</Link>
+               </span>
+            </div>
+         </div>
       </section>
    )
 }

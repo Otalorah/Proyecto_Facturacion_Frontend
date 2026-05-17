@@ -31,6 +31,7 @@ body {
   font-family: "IBM Plex Sans", "Source Sans 3", "Segoe UI", Tahoma, Geneva,
     Verdana, sans-serif;
   line-height: 1.5;
+  min-height: 100vh;
 }
 
 a {
@@ -44,4 +45,11 @@ a {
 
 #root {
   min-height: 100vh;
+}
+
+img,
+svg,
+video {
+  max-width: 100%;
+  height: auto;
 }

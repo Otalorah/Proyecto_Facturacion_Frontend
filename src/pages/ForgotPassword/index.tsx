@@ -33,32 +33,37 @@ function ForgotPasswordPage() {
 
    return (
       <section className={styles.wrapper}>
-         <h1>Recuperar contrasena</h1>
-         <p>Enviaremos un enlace para restablecer el acceso.</p>
+         <div className={styles.panel}>
+            <header className={styles.header}>
+               <span className={styles.badge}>Soporte de acceso</span>
+               <h1>Recuperar contrasena</h1>
+               <p>Enviaremos un enlace para restablecer el acceso.</p>
+            </header>
 
-         <form className={styles.form} onSubmit={handleSubmit}>
-            <label htmlFor="email">Correo</label>
-            <Input
-               id="email"
-               type="email"
-               autoComplete="email"
-               value={email}
-               onChange={(event) => setEmail(event.target.value)}
-               placeholder="correo@empresa.com"
-               required
-            />
+            <form className={styles.form} onSubmit={handleSubmit}>
+               <label htmlFor="email">Correo</label>
+               <Input
+                  id="email"
+                  type="email"
+                  autoComplete="email"
+                  value={email}
+                  onChange={(event) => setEmail(event.target.value)}
+                  placeholder="correo@empresa.com"
+                  required
+               />
 
-            {error ? <p className={styles.error}>{error}</p> : null}
-            {message ? <p className={styles.success}>{message}</p> : null}
+               {error ? <p className={styles.error}>{error}</p> : null}
+               {message ? <p className={styles.success}>{message}</p> : null}
 
-            <Button type="submit" disabled={isSubmitting}>
-               {isSubmitting ? 'Enviando...' : 'Enviar instrucciones'}
-            </Button>
-         </form>
+               <Button type="submit" disabled={isSubmitting}>
+                  {isSubmitting ? 'Enviando...' : 'Enviar instrucciones'}
+               </Button>
+            </form>
 
-         <p>
-            <Link to="/login">Volver a inicio de sesion</Link>
-         </p>
+            <div className={styles.footer}>
+               <Link to="/login">Volver a inicio de sesion</Link>
+            </div>
+         </div>
       </section>
    )
 }

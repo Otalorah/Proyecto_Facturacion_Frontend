@@ -8,6 +8,7 @@
   align-items: center;
   justify-content: space-between;
   gap: 1rem;
+  flex-wrap: wrap;
 }
 
 .wrapper h1 {
@@ -23,10 +24,12 @@
 .searchRow {
   display: flex;
   gap: 0.6rem;
+  flex-wrap: wrap;
 }
 
 .tableWrap {
   overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
   background: var(--surface-soft);
   border: 1px solid var(--line);
   border-radius: 14px;
@@ -70,6 +73,7 @@
   align-items: center;
   justify-content: space-between;
   gap: 0.8rem;
+  flex-wrap: wrap;
 }
 
 .error {
@@ -140,5 +144,17 @@
 
   .pagination {
     flex-direction: column;
+  }
+
+  .table th,
+  .table td {
+    padding: 0.6rem 0.55rem;
+    font-size: 0.92rem;
+  }
+}
+
+@media (max-width: 520px) {
+  .table {
+    min-width: 520px;
   }
 }

@@ -42,45 +42,50 @@ function LoginPage() {
 
    return (
       <section className={styles.wrapper}>
-         <h1>Iniciar sesion</h1>
-         <p>Accede para gestionar productos e inventario.</p>
+         <div className={styles.panel}>
+            <header className={styles.header}>
+               <span className={styles.badge}>FacturaApp</span>
+               <h1>Iniciar sesion</h1>
+               <p>Accede para gestionar productos e inventario.</p>
+            </header>
 
-         <form className={styles.form} onSubmit={handleSubmit}>
-            <label htmlFor="email">Correo</label>
-            <Input
-               id="email"
-               type="email"
-               autoComplete="email"
-               value={email}
-               onChange={(event) => setEmail(event.target.value)}
-               placeholder="correo@empresa.com"
-               required
-            />
+            <form className={styles.form} onSubmit={handleSubmit}>
+               <label htmlFor="email">Correo</label>
+               <Input
+                  id="email"
+                  type="email"
+                  autoComplete="email"
+                  value={email}
+                  onChange={(event) => setEmail(event.target.value)}
+                  placeholder="correo@empresa.com"
+                  required
+               />
 
-            <label htmlFor="password">Contraseña</label>
-            <Input
-               id="password"
-               type="password"
-               autoComplete="current-password"
-               value={password}
-               onChange={(event) => setPassword(event.target.value)}
-               placeholder="********"
-               required
-            />
+               <label htmlFor="password">Contrasena</label>
+               <Input
+                  id="password"
+                  type="password"
+                  autoComplete="current-password"
+                  value={password}
+                  onChange={(event) => setPassword(event.target.value)}
+                  placeholder="********"
+                  required
+               />
 
-            {error ? <p className={styles.error}>{error}</p> : null}
+               {error ? <p className={styles.error}>{error}</p> : null}
 
-            <Button type="submit" disabled={isSubmitting}>
-               {isSubmitting ? 'Ingresando...' : 'Entrar'}
-            </Button>
-         </form>
+               <Button type="submit" disabled={isSubmitting}>
+                  {isSubmitting ? 'Ingresando...' : 'Entrar'}
+               </Button>
+            </form>
 
-         <p>
-            No tienes cuenta? <Link to="/register">Registrate</Link>
-         </p>
-         <p>
-            <Link to="/forgot-password">Olvidaste tu contrasena?</Link>
-         </p>
+            <div className={styles.footer}>
+               <span>
+                  No tienes cuenta? <Link to="/register">Registrate</Link>
+               </span>
+               <Link to="/forgot-password">Olvidaste tu contrasena?</Link>
+            </div>
+         </div>
       </section>
    )
 }
