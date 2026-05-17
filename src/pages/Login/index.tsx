@@ -42,9 +42,11 @@ function LoginPage() {
 
    return (
       <section className={styles.wrapper}>
+         <div className={styles.brandMark}>
+            <span className={styles.badge}>FacturaApp</span>
+         </div>
          <div className={styles.panel}>
             <header className={styles.header}>
-               <span className={styles.badge}>FacturaApp</span>
                <h1>Iniciar sesion</h1>
                <p>Accede para gestionar productos e inventario.</p>
             </header>

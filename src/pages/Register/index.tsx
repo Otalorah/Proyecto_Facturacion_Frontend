@@ -48,7 +48,6 @@ function RegisterPage() {
       <section className={styles.wrapper}>
          <div className={styles.panel}>
             <header className={styles.header}>
-               <span className={styles.badge}>Alta de empresa</span>
                <h1>Crear cuenta</h1>
                <p>Registra tu empresa y empieza a facturar.</p>
             </header>
