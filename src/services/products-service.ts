@@ -9,14 +9,15 @@ const MOCK_NEXT_ID_KEY = 'mock.products.nextId'
 export type Product = {
    id: string
    name: string
-   sku: string
+   code: string
    price: number
    stock: number
+   active?: boolean
 }
 
 export type ProductInput = {
    name: string
-   sku: string
+   code: string
    price: number
    stock: number
 }
@@ -35,21 +36,21 @@ export type ListProductsResult = {
 }
 
 const MOCK_SEED_PRODUCTS: Product[] = [
-   { id: '1', name: 'Cuaderno A4', sku: 'PROD-001', price: 12500, stock: 22 },
-   { id: '2', name: 'Lapicero Azul', sku: 'PROD-002', price: 2500, stock: 140 },
-   { id: '3', name: 'Lapicero Negro', sku: 'PROD-003', price: 2500, stock: 115 },
-   { id: '4', name: 'Resaltador', sku: 'PROD-004', price: 4200, stock: 56 },
-   { id: '5', name: 'Carpeta Oficio', sku: 'PROD-005', price: 9800, stock: 38 },
-   { id: '6', name: 'Marcador Borrable', sku: 'PROD-006', price: 6900, stock: 28 },
-   { id: '7', name: 'Borrador Blanco', sku: 'PROD-007', price: 1800, stock: 90 },
-   { id: '8', name: 'Regla 30 cm', sku: 'PROD-008', price: 3300, stock: 46 },
-   { id: '9', name: 'Tijera Escolar', sku: 'PROD-009', price: 5400, stock: 31 },
-   { id: '10', name: 'Colbon 125 ml', sku: 'PROD-010', price: 5100, stock: 27 },
-   { id: '11', name: 'Block Carta', sku: 'PROD-011', price: 7600, stock: 62 },
-   { id: '12', name: 'Cartulina Blanca', sku: 'PROD-012', price: 1900, stock: 175 },
-   { id: '13', name: 'Folder Amarillo', sku: 'PROD-013', price: 1600, stock: 84 },
-   { id: '14', name: 'Grapadora Mini', sku: 'PROD-014', price: 14200, stock: 12 },
-   { id: '15', name: 'Cinta Transparente', sku: 'PROD-015', price: 3700, stock: 52 },
+   { id: '1', name: 'Cuaderno A4', code: 'PROD-001', price: 12500, stock: 22, active: true },
+   { id: '2', name: 'Lapicero Azul', code: 'PROD-002', price: 2500, stock: 140, active: true },
+   { id: '3', name: 'Lapicero Negro', code: 'PROD-003', price: 2500, stock: 115, active: true },
+   { id: '4', name: 'Resaltador', code: 'PROD-004', price: 4200, stock: 56, active: true },
+   { id: '5', name: 'Carpeta Oficio', code: 'PROD-005', price: 9800, stock: 38, active: true },
+   { id: '6', name: 'Marcador Borrable', code: 'PROD-006', price: 6900, stock: 28, active: true },
+   { id: '7', name: 'Borrador Blanco', code: 'PROD-007', price: 1800, stock: 90, active: true },
+   { id: '8', name: 'Regla 30 cm', code: 'PROD-008', price: 3300, stock: 46, active: true },
+   { id: '9', name: 'Tijera Escolar', code: 'PROD-009', price: 5400, stock: 31, active: true },
+   { id: '10', name: 'Colbon 125 ml', code: 'PROD-010', price: 5100, stock: 27, active: true },
+   { id: '11', name: 'Block Carta', code: 'PROD-011', price: 7600, stock: 62, active: true },
+   { id: '12', name: 'Cartulina Blanca', code: 'PROD-012', price: 1900, stock: 175, active: true },
+   { id: '13', name: 'Folder Amarillo', code: 'PROD-013', price: 1600, stock: 84, active: true },
+   { id: '14', name: 'Grapadora Mini', code: 'PROD-014', price: 14200, stock: 12, active: true },
+   { id: '15', name: 'Cinta Transparente', code: 'PROD-015', price: 3700, stock: 52, active: true },
 ]
 
 function toNumber(value: unknown, fallback = 0) {
@@ -62,18 +63,20 @@ function mapProduct(raw: Record<string, unknown> | null | undefined): Product {
       return {
          id: '',
          name: '',
-         sku: '',
+         code: '',
          price: 0,
          stock: 0,
+         active: undefined,
       }
    }
 
    return {
       id: String(raw.id ?? raw.productId ?? ''),
       name: String(raw.name ?? raw.nombre ?? ''),
-      sku: String(raw.sku ?? raw.code ?? ''),
+      code: String(raw.code ?? raw.sku ?? ''),
       price: toNumber(raw.price ?? raw.precio, 0),
       stock: toNumber(raw.stock ?? raw.inventory ?? 0, 0),
+      active: raw.active === undefined ? undefined : Boolean(raw.active),
    }
 }
 
@@ -127,7 +130,7 @@ function getNextMockId() {
 function normalizeProductInput(data: ProductInput): ProductInput {
    return {
       name: String(data?.name || '').trim(),
-      sku: String(data?.sku || '').trim(),
+      code: String(data?.code || '').trim(),
       price: toNumber(data?.price, Number.NaN),
       stock: toNumber(data?.stock, Number.NaN),
    }
@@ -145,8 +148,8 @@ function validateProductInput(
       fieldErrors.name = 'El nombre es obligatorio.'
    }
 
-   if (!product.sku) {
-      fieldErrors.sku = 'El SKU es obligatorio.'
+   if (!product.code) {
+      fieldErrors.code = 'El codigo es obligatorio.'
    }
 
    if (!Number.isFinite(product.price) || product.price < 0) {
@@ -162,11 +165,11 @@ function validateProductInput(
          return false
       }
 
-      return String(item.sku).toLowerCase() === product.sku.toLowerCase()
+      return String(item.code).toLowerCase() === product.code.toLowerCase()
    })
 
    if (duplicate) {
-      fieldErrors.sku = 'El SKU ya existe en otro producto.'
+      fieldErrors.code = 'El codigo ya existe en otro producto.'
    }
 
    if (Object.keys(fieldErrors).length > 0) {
@@ -182,50 +185,18 @@ function validateProductInput(
    return product
 }
 
-function normalizeListPayload(
-   payload: unknown,
-   fallbackPage: number,
-   fallbackSize: number,
-): ListProductsResult {
+function unwrapListPayload(payload: unknown): Product[] {
    if (Array.isArray(payload)) {
-      const items = payload.map((item) => mapProduct(item as Record<string, unknown>))
-
-      return {
-         items,
-         total: items.length,
-         page: fallbackPage,
-         size: fallbackSize,
-      }
+      return payload.map((item) => mapProduct(item as Record<string, unknown>))
    }
 
    const typedPayload = payload as Record<string, unknown> | null
-   const candidates = [
-      typedPayload,
-      (typedPayload?.data as Record<string, unknown> | null) ?? null,
-      (typedPayload?.result as Record<string, unknown> | null) ?? null,
-   ]
-
-   for (const candidate of candidates) {
-      if (!candidate) continue
-
-      const rawItems = (candidate.items || candidate.content || candidate.rows) as unknown
-
-      if (Array.isArray(rawItems)) {
-         return {
-            items: rawItems.map((item: Record<string, unknown>) => mapProduct(item)),
-            total: toNumber((candidate as Record<string, unknown>).total ?? (candidate as Record<string, unknown>).totalElements, rawItems.length),
-            page: toNumber((candidate as Record<string, unknown>).page ?? (candidate as Record<string, unknown>).number, fallbackPage),
-            size: toNumber((candidate as Record<string, unknown>).size, fallbackSize),
-         }
-      }
+   const data = (typedPayload?.data as unknown) ?? null
+   if (Array.isArray(data)) {
+      return data.map((item) => mapProduct(item as Record<string, unknown>))
    }
 
-   return {
-      items: [],
-      total: 0,
-      page: fallbackPage,
-      size: fallbackSize,
-   }
+   return []
 }
 
 export async function listProducts(
@@ -242,8 +213,8 @@ export async function listProducts(
       const filtered = searchText
          ? source.filter((item) => {
             const name = String(item.name || '').toLowerCase()
-            const sku = String(item.sku || '').toLowerCase()
-            return name.includes(searchText) || sku.includes(searchText)
+         const code = String(item.code || '').toLowerCase()
+         return name.includes(searchText) || code.includes(searchText)
          })
          : source
 
@@ -259,17 +230,30 @@ export async function listProducts(
       }
    }
 
-   const params = new URLSearchParams({
-      page: String(page),
-      size: String(size),
-   })
+   const params = new URLSearchParams()
 
    if (search.trim()) {
-      params.set('search', search.trim())
+      const trimmed = search.trim()
+      params.set('name', trimmed)
+      params.set('code', trimmed)
    }
 
-   const payload = await apiClient<ListProductsResult | Record<string, unknown>>(`/products?${params.toString()}`)
-   return normalizeListPayload(payload, page, size)
+   const query = params.toString()
+   const payload = await apiClient<Record<string, unknown> | Product[]>(
+      `/api/v1/products${query ? `?${query}` : ''}`,
+   )
+
+   const items = unwrapListPayload(payload)
+   const safePage = Math.max(1, toNumber(page, 1))
+   const safeSize = Math.max(1, toNumber(size, 10))
+   const start = (safePage - 1) * safeSize
+
+   return {
+      items: items.slice(start, start + safeSize),
+      total: items.length,
+      page: safePage,
+      size: safeSize,
+   }
 }
 
 export async function createProduct(data: ProductInput): Promise<Product> {
@@ -288,7 +272,7 @@ export async function createProduct(data: ProductInput): Promise<Product> {
       return mapProduct(created)
    }
 
-   const payload = await apiClient<Record<string, unknown>>('/products', {
+   const payload = await apiClient<Record<string, unknown>>('/api/v1/products', {
       method: 'POST',
       body: JSON.stringify(data),
    })
@@ -323,8 +307,8 @@ export async function updateProduct(id: string, data: ProductInput): Promise<Pro
       return mapProduct(updated)
    }
 
-   const payload = await apiClient<Record<string, unknown>>(`/products/${id}`, {
-      method: 'PUT',
+   const payload = await apiClient<Record<string, unknown>>(`/api/v1/products/${id}`, {
+      method: 'PATCH',
       body: JSON.stringify(data),
    })
 
@@ -349,7 +333,17 @@ export async function deleteProduct(id: string): Promise<void> {
       return
    }
 
-   await apiClient(`/products/${id}`, {
+   await apiClient(`/api/v1/products/${id}`, {
       method: 'DELETE',
    })
+}
+
+export async function listProductAlerts(): Promise<Product[]> {
+   if (MOCK_PRODUCTS) {
+      await wait(MOCK_LATENCY_MS)
+      return readMockProducts().filter((item) => item.stock <= 15)
+   }
+
+   const payload = await apiClient<Record<string, unknown> | Product[]>('/api/v1/products/alerts')
+   return unwrapListPayload(payload)
 }

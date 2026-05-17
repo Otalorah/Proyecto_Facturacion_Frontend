@@ -11,18 +11,18 @@ type AuthProviderProps = {
 export function AuthProvider({ children }: AuthProviderProps) {
    const [token, setToken] = useState<string>(() => localStorage.getItem(AUTH_TOKEN_KEY) || '')
 
-   useEffect(() => {
-      setApiAuthToken(token)
-   }, [token])
+   setApiAuthToken(token)
 
    const persistToken = useCallback((nextToken: string) => {
       if (!nextToken) {
          localStorage.removeItem(AUTH_TOKEN_KEY)
+         setApiAuthToken('')
          setToken('')
          return
       }
 
       localStorage.setItem(AUTH_TOKEN_KEY, nextToken)
+      setApiAuthToken(nextToken)
       setToken(nextToken)
    }, [])
 

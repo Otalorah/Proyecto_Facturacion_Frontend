@@ -1,10 +1,21 @@
 import { Link, NavLink, Outlet } from 'react-router-dom'
 import Button from '../components/ui/Button'
 import { useAuth } from '../auth/useAuth'
+import { logoutRequest } from '../services/auth-service'
 import './main-layout.css'
 
 function MainLayout() {
    const { logout } = useAuth()
+
+   async function handleLogout() {
+      try {
+         await logoutRequest()
+      } catch {
+         // Ignore API logout failures, still clear local session.
+      } finally {
+         logout()
+      }
+   }
 
    return (
       <div className="layout-shell">
@@ -16,9 +27,11 @@ function MainLayout() {
                <NavLink to="/dashboard" end>
                   Dashboard
                </NavLink>
-               <NavLink to="/about">Acerca</NavLink>
+               <NavLink to="/users">Usuarios</NavLink>
+               <NavLink to="/alerts">Alertas</NavLink>
+               <NavLink to="/account">Mi cuenta</NavLink>
             </nav>
-            <Button type="button" variant="secondary" onClick={logout}>
+            <Button type="button" variant="secondary" onClick={handleLogout}>
                Cerrar sesion
             </Button>
          </header>

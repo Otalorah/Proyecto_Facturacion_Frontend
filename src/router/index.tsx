@@ -1,13 +1,17 @@
 import { Navigate, createBrowserRouter } from 'react-router-dom'
 
 import HomePage from '../pages/Home'
-import AboutPage from '../pages/About'
 import LoginPage from '../pages/Login'
 import RegisterPage from '../pages/Register'
+import ForgotPasswordPage from '../pages/ForgotPassword'
+import ResetPasswordPage from '../pages/ResetPassword'
 import NotFoundPage from '../pages/NotFound'
 import MainLayout from '../layouts/MainLayout'
 import ProtectedRoute from './guards/ProtectedRoute'
 import PublicOnlyRoute from './guards/PublicOnlyRoute'
+import UsersPage from '../pages/Users'
+import AlertsPage from '../pages/Alerts'
+import AccountPage from '../pages/Account'
 
 export const router = createBrowserRouter([
    {
@@ -31,6 +35,26 @@ export const router = createBrowserRouter([
       ],
    },
    {
+      path: '/forgot-password',
+      element: <PublicOnlyRoute />,
+      children: [
+         {
+            index: true,
+            element: <ForgotPasswordPage />,
+         },
+      ],
+   },
+   {
+      path: '/reset-password',
+      element: <PublicOnlyRoute />,
+      children: [
+         {
+            index: true,
+            element: <ResetPasswordPage />,
+         },
+      ],
+   },
+   {
       path: '/',
       element: <ProtectedRoute />,
       children: [
@@ -46,8 +70,16 @@ export const router = createBrowserRouter([
                   element: <HomePage />,
                },
                {
-                  path: 'about',
-                  element: <AboutPage />,
+                  path: 'alerts',
+                  element: <AlertsPage />,
+               },
+               {
+                  path: 'users',
+                  element: <UsersPage />,
+               },
+               {
+                  path: 'account',
+                  element: <AccountPage />,
                },
             ],
          },

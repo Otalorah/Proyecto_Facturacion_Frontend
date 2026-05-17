@@ -52,7 +52,15 @@ export async function apiClient<T = unknown>(
       throw error
    }
 
+   if (response.status === 204) {
+      return null as T
+   }
+
    const contentType = response.headers.get('content-type') || ''
+
+   if (!contentType.includes('application/json')) {
+      return null as T
+   }
 
    return response.json() as Promise<T>
 }

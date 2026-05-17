@@ -1,5 +1,5 @@
 import { useState, type FormEvent } from 'react'
-import { Link, useLocation, useNavigate } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import Button from '../../components/ui/Button.tsx'
 import Input from '../../components/ui/Input.tsx'
 import { useDocumentTitle } from '../../hooks/useDocumentTitle.ts'
@@ -77,6 +77,9 @@ function LoginPage() {
 
          <p>
             No tienes cuenta? <Link to="/register">Registrate</Link>
+         </p>
+         <p>
+            <Link to="/forgot-password">Olvidaste tu contrasena?</Link>
          </p>
       </section>
    )

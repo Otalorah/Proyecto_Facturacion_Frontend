@@ -3,47 +3,48 @@ import Button from '../../components/ui/Button'
 import Input from '../../components/ui/Input'
 import { useDocumentTitle } from '../../hooks/useDocumentTitle'
 import {
-   createProduct,
-   deleteProduct,
-   listProducts,
-   updateProduct,
-   type Product,
-   type ProductInput,
-} from '../../services/products-service'
+   activateUser,
+   createUser,
+   deactivateUser,
+   listUsers,
+   updateUser,
+   type UserInput,
+   type UserRole,
+   type UserSummary,
+} from '../../services/users-service'
 import styles from './styles.module.css'
 
-function HomePage() {
-   useDocumentTitle('Dashboard de productos')
+function UsersPage() {
+   useDocumentTitle('Usuarios')
 
-   const [products, setProducts] = useState<Product[]>([])
+   const [users, setUsers] = useState<UserSummary[]>([])
    const [total, setTotal] = useState(0)
    const [page, setPage] = useState(1)
    const pageSize = 10
 
-   const [searchInput, setSearchInput] = useState('')
-   const [searchQuery, setSearchQuery] = useState('')
+   const [roleFilter, setRoleFilter] = useState<UserRole | ''>('')
 
    const [isLoading, setIsLoading] = useState(false)
    const [listError, setListError] = useState('')
 
    const [isModalOpen, setIsModalOpen] = useState(false)
-   const [editingProduct, setEditingProduct] = useState<Product | null>(null)
+   const [editingUser, setEditingUser] = useState<UserSummary | null>(null)
    const [isSubmitting, setIsSubmitting] = useState(false)
    const [submitError, setSubmitError] = useState('')
    const [validationErrors, setValidationErrors] = useState<Record<string, string>>({})
 
    type FormValues = {
       name: string
-      code: string
-      price: string
-      stock: string
+      email: string
+      password: string
+      role: UserRole
    }
 
    const [formValues, setFormValues] = useState<FormValues>({
       name: '',
-      code: '',
-      price: '',
-      stock: '',
+      email: '',
+      password: '',
+      role: 'EMPLOYEE',
    })
 
    const totalPages = useMemo(() => {
@@ -54,29 +55,30 @@ function HomePage() {
    useEffect(() => {
       let isMounted = true
 
-      async function loadProducts() {
+      async function loadUsers() {
          setIsLoading(true)
          setListError('')
 
          try {
-            const response = await listProducts({
+            const response = await listUsers({
                page,
                size: pageSize,
-               search: searchQuery,
+               role: roleFilter,
             })
 
             if (!isMounted) {
                return
             }
 
-            setProducts(response.items)
+            setUsers(response.items)
             setTotal(response.total)
          } catch (error) {
             if (!isMounted) {
                return
             }
 
-            setListError(error.message || 'No se pudieron cargar los productos.')
+            const message = (error as { message?: string })?.message
+            setListError(message || 'No se pudieron cargar los usuarios.')
          } finally {
             if (isMounted) {
                setIsLoading(false)
@@ -84,12 +86,12 @@ function HomePage() {
          }
       }
 
-      loadProducts()
+      loadUsers()
 
       return () => {
          isMounted = false
       }
-   }, [page, pageSize, searchQuery])
+   }, [page, pageSize, roleFilter])
 
    function extractValidationErrors(error: unknown): Record<string, string> {
       const details = (error as { details?: unknown })?.details ?? {}
@@ -118,25 +120,25 @@ function HomePage() {
    }
 
    function openCreateModal() {
-      setEditingProduct(null)
+      setEditingUser(null)
       setFormValues({
          name: '',
-         code: '',
-         price: '',
-         stock: '',
+         email: '',
+         password: '',
+         role: 'EMPLOYEE',
       })
       setSubmitError('')
       setValidationErrors({})
       setIsModalOpen(true)
    }
 
-   function openEditModal(product: Product) {
-      setEditingProduct(product)
+   function openEditModal(user: UserSummary) {
+      setEditingUser(user)
       setFormValues({
-         name: product.name,
-         code: product.code,
-         price: String(product.price),
-         stock: String(product.stock),
+         name: user.name,
+         email: user.email,
+         password: '',
+         role: user.role,
       })
       setSubmitError('')
       setValidationErrors({})
@@ -151,41 +153,50 @@ function HomePage() {
       setIsModalOpen(false)
    }
 
-   function handleChangeField(event: ChangeEvent<HTMLInputElement>) {
+   function handleChangeField(event: ChangeEvent<HTMLInputElement | HTMLSelectElement>) {
       const { name, value } = event.target
       setFormValues((prev) => ({ ...prev, [name]: value }))
       setValidationErrors((prev) => ({ ...prev, [name]: '' }))
    }
 
    async function loadCurrentPage() {
-      const response = await listProducts({
+      const response = await listUsers({
          page,
          size: pageSize,
-         search: searchQuery,
+         role: roleFilter,
       })
 
-      setProducts(response.items)
+      setUsers(response.items)
       setTotal(response.total)
    }
 
-   async function handleSubmitProduct(event: FormEvent<HTMLFormElement>) {
+   async function handleSubmitUser(event: FormEvent<HTMLFormElement>) {
       event.preventDefault()
       setIsSubmitting(true)
       setSubmitError('')
       setValidationErrors({})
 
-      const payload: ProductInput = {
+      const payload: UserInput = {
          name: formValues.name.trim(),
-         code: formValues.code.trim(),
-         price: Number(formValues.price),
-         stock: Number(formValues.stock),
+         email: formValues.email.trim(),
+         role: formValues.role,
+      }
+
+      if (!editingUser) {
+         payload.password = formValues.password
+      }
+
+      if (!editingUser && !payload.password) {
+         setValidationErrors({ password: 'La contrasena es obligatoria.' })
+         setIsSubmitting(false)
+         return
       }
 
       try {
-         if (editingProduct) {
-            await updateProduct(editingProduct.id, payload)
+         if (editingUser) {
+            await updateUser(editingUser.id, payload)
          } else {
-            await createProduct(payload)
+            await createUser(payload)
          }
 
          setIsModalOpen(false)
@@ -196,68 +207,67 @@ function HomePage() {
          if (Object.keys(backendFieldErrors).length > 0) {
             setValidationErrors(backendFieldErrors)
          } else {
-            setSubmitError(error.message || 'No se pudo guardar el producto.')
+            const message = (error as { message?: string })?.message
+            setSubmitError(message || 'No se pudo guardar el usuario.')
          }
       } finally {
          setIsSubmitting(false)
       }
    }
 
-   async function handleDelete(product: Product) {
-      const approved = window.confirm(
-         `Se eliminara el producto "${product.name}". Esta accion no se puede deshacer.`,
-      )
+   async function handleToggleStatus(user: UserSummary) {
+      const action = user.active ? 'desactivar' : 'activar'
+      const approved = window.confirm(`Se va a ${action} el usuario "${user.name}".`)
 
       if (!approved) {
          return
       }
 
       try {
-         await deleteProduct(product.id)
-
-         if (products.length === 1 && page > 1) {
-            setPage((prev) => prev - 1)
-            return
+         if (user.active) {
+            await deactivateUser(user.id)
+         } else {
+            await activateUser(user.id)
          }
 
          await loadCurrentPage()
       } catch (error) {
-         setListError(error.message || 'No se pudo eliminar el producto.')
+         const message = (error as { message?: string })?.message
+         setListError(message || 'No se pudo actualizar el usuario.')
       }
    }
-
-   function handleSearchSubmit(event: FormEvent<HTMLFormElement>) {
-      event.preventDefault()
-      setPage(1)
-      setSearchQuery(searchInput.trim())
-   }
-
-   const modalTitle = editingProduct ? 'Editar producto' : 'Crear producto'
 
    return (
       <section className={styles.wrapper}>
          <div className={styles.headerRow}>
             <div>
-               <h1>Productos</h1>
-               <p>Gestiona inventario con busqueda, paginacion y acciones CRUD.</p>
+               <h1>Usuarios</h1>
+               <p>Administra empleados, roles y estados de acceso.</p>
             </div>
             <Button type="button" onClick={openCreateModal}>
-               Nuevo producto
+               Nuevo usuario
             </Button>
          </div>
 
-         <form className={styles.searchRow} onSubmit={handleSearchSubmit}>
-            <Input
-               type="search"
-               value={searchInput}
-               onChange={(event) => setSearchInput(event.target.value)}
-               placeholder="Buscar por nombre o codigo"
-               aria-label="Buscar productos"
-            />
-            <Button type="submit" variant="secondary">
-               Buscar
-            </Button>
-         </form>
+         <div className={styles.filterRow}>
+            <label htmlFor="role" className={styles.filterLabel}>
+               Rol
+            </label>
+            <select
+               id="role"
+               name="role"
+               className={styles.select}
+               value={roleFilter}
+               onChange={(event) => {
+                  setPage(1)
+                  setRoleFilter(event.target.value as UserRole | '')
+               }}
+            >
+               <option value="">Todos</option>
+               <option value="ADMIN">Admin</option>
+               <option value="EMPLOYEE">Empleado</option>
+            </select>
+         </div>
 
          {listError ? <p className={styles.error}>{listError}</p> : null}
 
@@ -266,49 +276,43 @@ function HomePage() {
                <thead>
                   <tr>
                      <th>Nombre</th>
-                     <th>Codigo</th>
-                     <th>Precio</th>
-                     <th>Stock</th>
+                     <th>Correo</th>
+                     <th>Rol</th>
+                     <th>Estado</th>
                      <th>Acciones</th>
                   </tr>
                </thead>
                <tbody>
                   {isLoading ? (
                      <tr>
-                        <td colSpan="5" className={styles.emptyCell}>
-                           Cargando productos...
+                        <td colSpan={5} className={styles.emptyCell}>
+                           Cargando usuarios...
                         </td>
                      </tr>
                   ) : null}
 
-                  {!isLoading && products.length === 0 ? (
+                  {!isLoading && users.length === 0 ? (
                      <tr>
-                        <td colSpan="5" className={styles.emptyCell}>
-                           No hay productos para mostrar.
+                        <td colSpan={5} className={styles.emptyCell}>
+                           No hay usuarios para mostrar.
                         </td>
                      </tr>
                   ) : null}
 
                   {!isLoading
-                     ? products.map((product) => (
-                        <tr key={product.id}>
-                           <td>{product.name}</td>
-                           <td>{product.code}</td>
-                           <td>
-                              {new Intl.NumberFormat('es-CO', {
-                                 style: 'currency',
-                                 currency: 'COP',
-                                 maximumFractionDigits: 0,
-                              }).format(product.price)}
-                           </td>
-                           <td>{product.stock}</td>
+                     ? users.map((user) => (
+                        <tr key={user.id}>
+                           <td>{user.name}</td>
+                           <td>{user.email}</td>
+                           <td>{user.role === 'ADMIN' ? 'Admin' : 'Empleado'}</td>
+                           <td>{user.active ? 'Activo' : 'Inactivo'}</td>
                            <td>
                               <div className={styles.actionsCell}>
-                                 <Button type="button" variant="secondary" onClick={() => openEditModal(product)}>
+                                 <Button type="button" variant="secondary" onClick={() => openEditModal(user)}>
                                     Editar
                                  </Button>
-                                 <Button type="button" onClick={() => handleDelete(product)}>
-                                    Eliminar
+                                 <Button type="button" onClick={() => handleToggleStatus(user)}>
+                                    {user.active ? 'Desactivar' : 'Activar'}
                                  </Button>
                               </div>
                            </td>
@@ -342,58 +346,64 @@ function HomePage() {
          </div>
 
          {isModalOpen ? (
-            <div className={styles.modalOverlay} role="dialog" aria-modal="true" aria-label={modalTitle}>
+            <div className={styles.modalOverlay} role="dialog" aria-modal="true" aria-label="Formulario de usuario">
                <div className={styles.modalCard}>
-                  <h2>{modalTitle}</h2>
+                  <h2>{editingUser ? 'Editar usuario' : 'Crear usuario'}</h2>
 
-                  <form className={styles.modalForm} onSubmit={handleSubmitProduct}>
+                  <form className={styles.modalForm} onSubmit={handleSubmitUser}>
                      <label htmlFor="name">Nombre</label>
                      <Input
                         id="name"
                         name="name"
                         value={formValues.name}
                         onChange={handleChangeField}
-                        placeholder="Ej. Cuaderno A4"
+                        placeholder="Nombre completo"
                         required
                      />
                      {validationErrors.name ? <p className={styles.fieldError}>{validationErrors.name}</p> : null}
 
-                     <label htmlFor="code">Codigo</label>
+                     <label htmlFor="email">Correo</label>
                      <Input
-                        id="code"
-                        name="code"
-                        value={formValues.code}
+                        id="email"
+                        name="email"
+                        type="email"
+                        value={formValues.email}
                         onChange={handleChangeField}
-                        placeholder="PROD-001"
+                        placeholder="correo@empresa.com"
                         required
                      />
-                     {validationErrors.code ? <p className={styles.fieldError}>{validationErrors.code}</p> : null}
+                     {validationErrors.email ? <p className={styles.fieldError}>{validationErrors.email}</p> : null}
 
-                     <label htmlFor="price">Precio</label>
-                     <Input
-                        id="price"
-                        name="price"
-                        type="number"
-                        min="0"
-                        value={formValues.price}
-                        onChange={handleChangeField}
-                        placeholder="0"
-                        required
-                     />
-                     {validationErrors.price ? <p className={styles.fieldError}>{validationErrors.price}</p> : null}
+                     {!editingUser ? (
+                        <>
+                           <label htmlFor="password">Contrasena</label>
+                           <Input
+                              id="password"
+                              name="password"
+                              type="password"
+                              value={formValues.password}
+                              onChange={handleChangeField}
+                              placeholder="********"
+                              required
+                           />
+                           {validationErrors.password ? (
+                              <p className={styles.fieldError}>{validationErrors.password}</p>
+                           ) : null}
+                        </>
+                     ) : null}
 
-                     <label htmlFor="stock">Stock</label>
-                     <Input
-                        id="stock"
-                        name="stock"
-                        type="number"
-                        min="0"
-                        value={formValues.stock}
+                     <label htmlFor="role">Rol</label>
+                     <select
+                        id="role"
+                        name="role"
+                        className={styles.select}
+                        value={formValues.role}
                         onChange={handleChangeField}
-                        placeholder="0"
-                        required
-                     />
-                     {validationErrors.stock ? <p className={styles.fieldError}>{validationErrors.stock}</p> : null}
+                     >
+                        <option value="ADMIN">Admin</option>
+                        <option value="EMPLOYEE">Empleado</option>
+                     </select>
+                     {validationErrors.role ? <p className={styles.fieldError}>{validationErrors.role}</p> : null}
 
                      {submitError ? <p className={styles.error}>{submitError}</p> : null}
 
@@ -413,4 +423,4 @@ function HomePage() {
    )
 }
 
-export default HomePage
+export default UsersPage
