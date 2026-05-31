@@ -1,0 +1,31 @@
+.info-list {
+  display: grid;
+  gap: 0.65rem;
+  margin: 0;
+}
+
+.info-list-row {
+  display: grid;
+  grid-template-columns: 160px 1fr;
+  gap: 0.6rem;
+  padding: 0.65rem 0.75rem;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--surface-soft);
+}
+
+.info-list dt {
+  font-weight: 600;
+  color: var(--text-soft);
+  margin: 0;
+}
+
+.info-list dd {
+  margin: 0;
+}
+
+@media (max-width: 640px) {
+  .info-list-row {
+    grid-template-columns: 1fr;
+  }
+}

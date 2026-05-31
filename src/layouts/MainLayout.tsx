@@ -28,7 +28,12 @@ function MainLayout() {
                   Dashboard
                </NavLink>
                <NavLink to="/users">Usuarios</NavLink>
+               <NavLink to="/clients">Clientes</NavLink>
+               <NavLink to="/sales">Ventas</NavLink>
+               <NavLink to="/invoices">Facturas</NavLink>
+               <NavLink to="/payments">Pagos</NavLink>
                <NavLink to="/alerts">Alertas</NavLink>
+               <NavLink to="/audit">Auditoria</NavLink>
                <NavLink to="/account">Mi cuenta</NavLink>
             </nav>
             <Button type="button" variant="secondary" onClick={handleLogout}>

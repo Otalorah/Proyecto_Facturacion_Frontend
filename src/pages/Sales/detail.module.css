@@ -1,0 +1,119 @@
+.wrapper {
+  display: grid;
+  gap: 1rem;
+}
+
+.headerRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.wrapper h1 {
+  margin: 0;
+  font-size: clamp(1.4rem, 3.6vw, 2rem);
+}
+
+.wrapper p {
+  margin: 0;
+  color: var(--text-soft);
+}
+
+.card {
+  border: 1px solid var(--line);
+  background: var(--surface);
+  border-radius: 16px;
+  padding: 1rem;
+  display: grid;
+  gap: 1rem;
+}
+
+.actionsRow {
+  display: flex;
+  gap: 0.6rem;
+  flex-wrap: wrap;
+}
+
+.formRow {
+  display: flex;
+  gap: 0.6rem;
+  flex-wrap: wrap;
+}
+
+.tableWrap {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  background: var(--surface-soft);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.table th,
+.table td {
+  text-align: left;
+  padding: 0.75rem;
+  border-bottom: 1px solid var(--line);
+  white-space: nowrap;
+}
+
+.table th {
+  font-size: 0.92rem;
+  color: var(--text-soft);
+  background: color-mix(in srgb, var(--surface) 80%, #000);
+}
+
+.table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.emptyCell {
+  text-align: center;
+  color: var(--text-soft);
+}
+
+.actionsCell {
+  display: flex;
+  gap: 0.45rem;
+  flex-wrap: wrap;
+}
+
+.linkButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.45rem 0.7rem;
+  border-radius: 10px;
+  border: 1px solid var(--line);
+  background: transparent;
+  color: var(--text);
+  text-decoration: none;
+}
+
+.error {
+  margin: 0;
+  color: var(--danger);
+  font-size: 0.95rem;
+}
+
+.muted {
+  margin: 0;
+  color: var(--text-soft);
+}
+
+@media (max-width: 760px) {
+  .headerRow {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .formRow {
+    flex-direction: column;
+  }
+}

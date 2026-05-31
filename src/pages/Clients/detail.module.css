@@ -1,0 +1,64 @@
+.wrapper {
+  display: grid;
+  gap: 1rem;
+}
+
+.headerRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.wrapper h1 {
+  margin: 0;
+  font-size: clamp(1.4rem, 3.6vw, 2rem);
+}
+
+.wrapper p {
+  margin: 0;
+  color: var(--text-soft);
+}
+
+.card {
+  border: 1px solid var(--line);
+  background: var(--surface);
+  border-radius: 16px;
+  padding: 1rem;
+}
+
+.linkButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.45rem 0.7rem;
+  border-radius: 10px;
+  border: 1px solid var(--line);
+  background: transparent;
+  color: var(--text);
+  text-decoration: none;
+}
+
+.error {
+  margin: 0;
+  color: var(--danger);
+  font-size: 0.95rem;
+}
+
+.muted {
+  margin: 0;
+  color: var(--text-soft);
+}
+
+.footer {
+  display: flex;
+  justify-content: flex-end;
+}
+
+@media (max-width: 760px) {
+  .headerRow {
+    flex-direction: column;
+    align-items: stretch;
+  }
+}

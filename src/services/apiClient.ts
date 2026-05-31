@@ -64,3 +64,10 @@ export async function apiClient<T = unknown>(
 
    return response.json() as Promise<T>
 }
+
+   export async function apiFetch(path: string, options: RequestInit = {}) {
+      return fetch(`${API_URL}${path}`, {
+         headers: buildHeaders((options as RequestInit & { headers?: Record<string, string> }).headers),
+         ...options,
+      })
+   }

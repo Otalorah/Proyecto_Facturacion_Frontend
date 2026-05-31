@@ -12,6 +12,15 @@ import PublicOnlyRoute from './guards/PublicOnlyRoute'
 import UsersPage from '../pages/Users'
 import AlertsPage from '../pages/Alerts'
 import AccountPage from '../pages/Account'
+import ClientsPage from '../pages/Clients'
+import ClientDetailPage from '../pages/Clients/detail'
+import SalesPage from '../pages/Sales'
+import SalesDetailPage from '../pages/Sales/detail'
+import InvoicesPage from '../pages/Invoices'
+import InvoiceDetailPage from '../pages/Invoices/detail'
+import PaymentsPage from '../pages/Payments'
+import PaymentDetailPage from '../pages/Payments/detail'
+import AuditPage from '../pages/Audit'
 
 export const router = createBrowserRouter([
    {
@@ -76,6 +85,42 @@ export const router = createBrowserRouter([
                {
                   path: 'users',
                   element: <UsersPage />,
+               },
+               {
+                  path: 'clients',
+                  element: <ClientsPage />,
+               },
+               {
+                  path: 'clients/:id',
+                  element: <ClientDetailPage />,
+               },
+               {
+                  path: 'sales',
+                  element: <SalesPage />,
+               },
+               {
+                  path: 'sales/:id',
+                  element: <SalesDetailPage />,
+               },
+               {
+                  path: 'invoices',
+                  element: <InvoicesPage />,
+               },
+               {
+                  path: 'invoices/:id',
+                  element: <InvoiceDetailPage />,
+               },
+               {
+                  path: 'payments',
+                  element: <PaymentsPage />,
+               },
+               {
+                  path: 'payments/:id',
+                  element: <PaymentDetailPage />,
+               },
+               {
+                  path: 'audit',
+                  element: <AuditPage />,
                },
                {
                   path: 'account',
