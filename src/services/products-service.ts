@@ -244,7 +244,6 @@ export async function listProducts(
    if (search.trim()) {
       const trimmed = search.trim()
       params.set('name', trimmed)
-      params.set('code', trimmed)
    }
 
    const query = params.toString()

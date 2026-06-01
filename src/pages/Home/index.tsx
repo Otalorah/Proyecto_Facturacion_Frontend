@@ -256,7 +256,7 @@ function HomePage() {
                type="search"
                value={searchInput}
                onChange={(event) => setSearchInput(event.target.value)}
-               placeholder="Buscar por nombre o codigo"
+               placeholder="Buscar por nombre"
                aria-label="Buscar productos"
             />
             <Button type="submit" variant="secondary">
