@@ -254,7 +254,7 @@ export async function updateUser(id: string, data: UserInput): Promise<UserSumma
    }
 
    const payload = await apiClient<Record<string, unknown>>(`/api/v1/users/${id}`, {
-      method: 'PUT',
+      method: 'PATCH',
       body: JSON.stringify(data),
    })
 
