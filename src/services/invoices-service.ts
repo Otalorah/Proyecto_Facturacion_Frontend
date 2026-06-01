@@ -2,24 +2,25 @@ import { apiClient, apiFetch } from './apiClient'
 import { unwrapApiData } from './response-utils'
 
 export type InvoiceType = 'SIMPLE' | 'DETAILED'
+export type InvoicePayStatus = 'PENDING' | 'PAID' | 'REJECTED'
 
 export type InvoiceItem = {
-   id: string
+   productCode: string
    productName: string
    quantity: number
    unitPrice: number
-   total: number
+   lineTotal: number
 }
 
 export type Invoice = {
    id: string
    invoiceNumber: string
    type: InvoiceType
-   status: string
+   payStatus: InvoicePayStatus
    createdAt: string
    total: number
    saleId: string
-   items: InvoiceItem[]
+   lineItems: InvoiceItem[]
 }
 
 export type CreateInvoiceRequest = {
@@ -35,11 +36,11 @@ function toNumber(value: unknown, fallback = 0) {
 function mapInvoiceItem(raw: Record<string, unknown> | null | undefined): InvoiceItem {
    if (!raw) {
       return {
-         id: '',
+         productCode: '',
          productName: '',
          quantity: 0,
          unitPrice: 0,
-         total: 0,
+         lineTotal: 0,
       }
    }
 
@@ -47,11 +48,11 @@ function mapInvoiceItem(raw: Record<string, unknown> | null | undefined): Invoic
    const unitPrice = toNumber(raw.unitPrice ?? raw.price ?? 0, 0)
 
    return {
-      id: String(raw.id ?? raw.detailId ?? ''),
+      productCode: String(raw.productCode ?? raw.id ?? raw.detailId ?? ''),
       productName: String(raw.productName ?? raw.product?.name ?? ''),
       quantity,
       unitPrice,
-      total: toNumber(raw.total ?? quantity * unitPrice, 0),
+      lineTotal: toNumber(raw.lineTotal ?? raw.total ?? quantity * unitPrice, 0),
    }
 }
 
@@ -61,29 +62,34 @@ function mapInvoice(raw: Record<string, unknown> | null | undefined): Invoice {
          id: '',
          invoiceNumber: '',
          type: 'SIMPLE',
-         status: '',
+         payStatus: 'PENDING',
          createdAt: '',
          total: 0,
          saleId: '',
-         items: [],
+         lineItems: [],
       }
    }
 
-   const items = Array.isArray((raw as { items?: unknown })?.items)
-      ? ((raw as { items?: unknown }).items as unknown[]).map((item) => mapInvoiceItem(item as Record<string, unknown>))
-      : Array.isArray((raw as { details?: unknown })?.details)
-         ? ((raw as { details?: unknown }).details as unknown[]).map((item) => mapInvoiceItem(item as Record<string, unknown>))
-         : []
+   const rawItems =
+       Array.isArray(raw.lineItems)  // ✅ lo que devuelve la API
+           ? (raw.lineItems as unknown[])
+           : Array.isArray(raw.items)
+               ? (raw.items as unknown[])
+               : Array.isArray(raw.details)
+                   ? (raw.details as unknown[])
+                   : []
+
+   const lineItems = rawItems.map((item) => mapInvoiceItem(item as Record<string, unknown>))
 
    return {
       id: String(raw.id ?? raw.invoiceId ?? ''),
       invoiceNumber: String(raw.invoiceNumber ?? raw.number ?? ''),
       type: (String(raw.type ?? raw.invoiceType ?? 'SIMPLE').toUpperCase() as InvoiceType) || 'SIMPLE',
-      status: String(raw.status ?? ''),
+      payStatus: String(raw.payStatus ?? raw.invoicePayStatus ?? 'PENDING'.toUpperCase() as InvoicePayStatus) || 'PENDING',
       createdAt: String(raw.createdAt ?? raw.issueDate ?? ''),
       total: toNumber(raw.total ?? raw.totalAmount ?? raw.amount ?? 0, 0),
       saleId: String(raw.saleId ?? raw.sale?.id ?? ''),
-      items,
+      lineItems
    }
 }
 
@@ -121,6 +127,28 @@ export async function createInvoice(payload: CreateInvoiceRequest): Promise<Invo
 }
 
 export async function exportInvoicePdf(id: string, format = 'pdf') {
+   const response = await apiFetch(`/api/v1/invoices/${id}/export?format=${encodeURIComponent(format)}`)
+
+   if (!response.ok) {
+      throw new Error(`HTTP ${response.status}`)
+   }
+
+   const blob = await response.blob()
+   return blob
+}
+
+export async function exportInvoiceXml(id: string, format = 'xml') {
+   const response = await apiFetch(`/api/v1/invoices/${id}/export?format=${encodeURIComponent(format)}`)
+
+   if (!response.ok) {
+      throw new Error(`HTTP ${response.status}`)
+   }
+
+   const blob = await response.blob()
+   return blob
+}
+
+export async function exportInvoiceJson(id: string, format = 'json') {
    const response = await apiFetch(`/api/v1/invoices/${id}/export?format=${encodeURIComponent(format)}`)
 
    if (!response.ok) {

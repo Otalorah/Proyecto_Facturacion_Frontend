@@ -3,8 +3,8 @@ import { extractPage, toNumber, unwrapApiData } from './response-utils'
 
 const API_URL = (import.meta.env.VITE_API_URL as string | undefined) || 'http://localhost:3000'
 
-export type PaymentMethod = 'CASH' | 'CREDIT_CARD' | 'DEBIT_CARD' | 'TRANSFER'
-export type PaymentStatus = 'PENDING' | 'COMPLETED' | 'FAILED' | 'REFUNDED'
+export type PaymentMethod = 'CASH' | 'CARD' | 'QR' | 'TRANSFER'
+export type PaymentStatus = 'PENDIENTE' | 'APROBADO' | 'RECHAZADO'
 
 export type Payment = {
    id: string
@@ -23,9 +23,7 @@ export type CreatePaymentRequest = {
 
 export type ManualPaymentRequest = {
    invoiceId: string
-   method: PaymentMethod
    amount: number
-   reference?: string
 }
 
 export type ListPaymentsParams = {
@@ -49,7 +47,7 @@ function mapPayment(raw: Record<string, unknown> | null | undefined): Payment {
          id: '',
          invoiceId: '',
          method: 'CASH',
-         status: 'PENDING',
+         status: 'PENDIENTE',
          amount: 0,
          createdAt: '',
       }
@@ -58,10 +56,10 @@ function mapPayment(raw: Record<string, unknown> | null | undefined): Payment {
    return {
       id: String(raw.id ?? raw.paymentId ?? ''),
       invoiceId: String(raw.invoiceId ?? raw.invoice?.id ?? ''),
-      method: (String(raw.method ?? raw.paymentMethod ?? 'CASH').toUpperCase() as PaymentMethod) || 'CASH',
-      status: (String(raw.status ?? 'PENDING').toUpperCase() as PaymentStatus) || 'PENDING',
+      method: (String(raw.type ?? raw.method ?? raw.paymentMethod ?? 'CASH').toUpperCase() as PaymentMethod),
+      status: (String(raw.status ?? 'PENDIENTE').toUpperCase() as PaymentStatus),
       amount: toNumber(raw.amount ?? raw.total ?? 0, 0),
-      createdAt: String(raw.createdAt ?? raw.paymentDate ?? ''),
+      createdAt: String(raw.paymentDate ?? raw.createdAt ?? ''),
    }
 }
 

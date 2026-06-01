@@ -1,9 +1,8 @@
 import { useEffect, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
-import Button from '../../components/ui/Button'
 import InfoList from '../../components/ui/InfoList'
 import { useDocumentTitle } from '../../hooks/useDocumentTitle'
-import { exportInvoicePdf, getInvoice, type Invoice } from '../../services/invoices-service'
+import { getInvoice, type Invoice } from '../../services/invoices-service'
 import styles from './detail.module.css'
 
 function InvoiceDetailPage() {
@@ -48,24 +47,6 @@ function InvoiceDetailPage() {
       }
    }, [id])
 
-   async function handleExport() {
-      if (!invoice) {
-         return
-      }
-
-      try {
-         const blob = await exportInvoicePdf(invoice.id)
-         const url = URL.createObjectURL(blob)
-         const anchor = document.createElement('a')
-         anchor.href = url
-         anchor.download = invoice.invoiceNumber ? `invoice-${invoice.invoiceNumber}.pdf` : `invoice-${invoice.id}.pdf`
-         anchor.click()
-         URL.revokeObjectURL(url)
-      } catch (requestError) {
-         setError((requestError as { message?: string })?.message || 'No se pudo exportar la factura.')
-      }
-   }
-
    return (
       <section className={styles.wrapper}>
          <header className={styles.headerRow}>
@@ -88,7 +69,7 @@ function InvoiceDetailPage() {
                      { label: 'Factura', value: invoice.invoiceNumber || invoice.id },
                      { label: 'Venta', value: invoice.saleId },
                      { label: 'Tipo', value: invoice.type },
-                     { label: 'Estado', value: invoice.status || '-' },
+                     { label: 'Estado', value: invoice.payStatus || '-' },
                      {
                         label: 'Total',
                         value: new Intl.NumberFormat('es-CO', {
@@ -100,11 +81,6 @@ function InvoiceDetailPage() {
                      { label: 'Fecha', value: invoice.createdAt ? new Date(invoice.createdAt).toLocaleString('es-CO') : '-' },
                   ]}
                />
-               <div className={styles.actionsRow}>
-                  <Button type="button" onClick={handleExport}>
-                     Exportar PDF
-                  </Button>
-               </div>
             </div>
          ) : null}
 
@@ -119,7 +95,7 @@ function InvoiceDetailPage() {
                   </tr>
                </thead>
                <tbody>
-                  {!isLoading && invoice?.items?.length === 0 ? (
+                  {!isLoading && invoice?.lineItems?.length === 0 ? (
                      <tr>
                         <td colSpan={4} className={styles.emptyCell}>
                            No hay productos en la factura.
@@ -127,23 +103,23 @@ function InvoiceDetailPage() {
                      </tr>
                   ) : null}
 
-                  {invoice?.items?.map((item) => (
-                     <tr key={item.id}>
-                        <td>{item.productName}</td>
-                        <td>{item.quantity}</td>
+                  {invoice?.lineItems?.map((product) => (
+                     <tr key={product.productCode}>
+                        <td>{product.productName}</td>
+                        <td>{product.quantity}</td>
                         <td>
                            {new Intl.NumberFormat('es-CO', {
                               style: 'currency',
                               currency: 'COP',
                               maximumFractionDigits: 0,
-                           }).format(item.unitPrice || 0)}
+                           }).format(product.unitPrice || 0)}
                         </td>
                         <td>
                            {new Intl.NumberFormat('es-CO', {
                               style: 'currency',
                               currency: 'COP',
                               maximumFractionDigits: 0,
-                           }).format(item.total || 0)}
+                           }).format(product.lineTotal || 0)}
                         </td>
                      </tr>
                   ))}

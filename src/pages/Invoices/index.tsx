@@ -6,6 +6,8 @@ import { useDocumentTitle } from '../../hooks/useDocumentTitle'
 import {
    createInvoice,
    exportInvoicePdf,
+   exportInvoiceXml,
+   exportInvoiceJson,
    listInvoices,
    type CreateInvoiceRequest,
    type Invoice,
@@ -102,13 +104,40 @@ function InvoicesPage() {
       }
    }
 
-   async function handleExport(invoice: Invoice) {
+   async function handleExportPdf(invoice: Invoice) {
       try {
          const blob = await exportInvoicePdf(invoice.id)
          const url = URL.createObjectURL(blob)
          const anchor = document.createElement('a')
          anchor.href = url
          anchor.download = invoice.invoiceNumber ? `invoice-${invoice.invoiceNumber}.pdf` : `invoice-${invoice.id}.pdf`
+         anchor.click()
+         URL.revokeObjectURL(url)
+      } catch (error) {
+         setListError((error as { message?: string })?.message || 'No se pudo exportar la factura.')
+      }
+   }
+
+   async function handleExportXml(invoice: Invoice) {
+      try {
+         const blob = await exportInvoiceXml(invoice.id)
+         const url = URL.createObjectURL(blob)
+         const anchor = document.createElement('a')
+         anchor.href = url
+         anchor.download = invoice.invoiceNumber ? `invoice-${invoice.invoiceNumber}.xml` : `invoice-${invoice.id}.xml`
+         anchor.click()
+         URL.revokeObjectURL(url)
+      } catch (error) {
+         setListError((error as { message?: string })?.message || 'No se pudo exportar la factura.')
+      }
+   }
+   async function handleExportJson(invoice: Invoice) {
+      try {
+         const blob = await exportInvoiceJson(invoice.id)
+         const url = URL.createObjectURL(blob)
+         const anchor = document.createElement('a')
+         anchor.href = url
+         anchor.download = invoice.invoiceNumber ? `invoice-${invoice.invoiceNumber}.json` : `invoice-${invoice.id}.json`
          anchor.click()
          URL.revokeObjectURL(url)
       } catch (error) {
@@ -165,7 +194,7 @@ function InvoicesPage() {
                            <td>{invoice.invoiceNumber || invoice.id}</td>
                            <td>{invoice.saleId}</td>
                            <td>{invoice.type}</td>
-                           <td>{invoice.status || '-'}</td>
+                           <td>{invoice.payStatus || '-'}</td>
                            <td>
                               {new Intl.NumberFormat('es-CO', {
                                  style: 'currency',
@@ -178,8 +207,14 @@ function InvoicesPage() {
                                  <Link className={styles.linkButton} to={`/invoices/${invoice.id}`}>
                                     Ver
                                  </Link>
-                                 <Button type="button" variant="secondary" onClick={() => handleExport(invoice)}>
+                                 <Button type="button" variant="secondary" onClick={() => handleExportPdf(invoice)}>
                                     Exportar PDF
+                                 </Button>
+                                 <Button type="button" variant="secondary" onClick={() => handleExportXml(invoice)}>
+                                    Exportar XML
+                                 </Button>
+                                 <Button type="button" variant="secondary" onClick={() => handleExportJson(invoice)}>
+                                    Exportar JSON
                                  </Button>
                               </div>
                            </td>

@@ -1,7 +1,7 @@
 import { apiClient } from './apiClient'
 import { extractPage, toNumber, unwrapApiData } from './response-utils'
 
-export type SaleStatus = 'PENDING' | 'CONFIRMED' | 'CANCELLED'
+export type SaleStatus = 'ABIERTA' | 'CERRADA' | 'ANULADA'
 
 export type SaleItem = {
    id: string
@@ -16,7 +16,7 @@ export type SaleSummary = {
    id: string
    clientId: string
    clientName: string
-   status: SaleStatus
+   state: SaleStatus
    saleDate: string
    total: number
 }
@@ -42,7 +42,7 @@ export type ListSalesParams = {
    page?: number
    size?: number
    clientId?: string
-   status?: SaleStatus | ''
+   state?: SaleStatus | ''
    from?: string
    to?: string
 }
@@ -85,7 +85,7 @@ function mapSale(raw: Record<string, unknown> | null | undefined): SaleSummary {
          id: '',
          clientId: '',
          clientName: '',
-         status: 'PENDING',
+         state: 'ABIERTA',
          saleDate: '',
          total: 0,
       }
@@ -95,7 +95,7 @@ function mapSale(raw: Record<string, unknown> | null | undefined): SaleSummary {
       id: String(raw.id ?? raw.saleId ?? ''),
       clientId: String(raw.clientId ?? raw.client?.id ?? ''),
       clientName: String(raw.clientName ?? raw.client?.name ?? ''),
-      status: (String(raw.status ?? 'PENDING').toUpperCase() as SaleStatus) || 'PENDING',
+      state: (String(raw.state ?? 'ABIERTA').toUpperCase() as SaleStatus) || 'ABIERTA',
       saleDate: String(raw.saleDate ?? raw.createdAt ?? ''),
       total: toNumber(raw.total ?? raw.totalAmount ?? raw.amount ?? 0, 0),
    }
@@ -105,7 +105,7 @@ export async function listSales({
    page = 1,
    size = 10,
    clientId = '',
-   status = '',
+   state = '',
    from = '',
    to = '',
 }: ListSalesParams = {}): Promise<ListSalesResult> {
@@ -120,8 +120,8 @@ export async function listSales({
       params.set('clientId', clientId)
    }
 
-   if (status) {
-      params.set('status', status)
+   if (state) {
+      params.set('state', state)
    }
 
    if (from) {

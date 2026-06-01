@@ -7,7 +7,6 @@ import {
    createManualPayment,
    createPayment,
    fetchPaymentQrImage,
-   getPaymentQrViewUrl,
    listPayments,
    type Payment,
    type PaymentMethod,
@@ -147,6 +146,12 @@ function PaymentsPage() {
 
       const amount = Number(formValues.amount)
 
+      if (formValues.method === 'QR') {
+         setIsModalOpen(false)
+         await handleShowQrFromInvoice(formValues.invoiceId.trim())
+         return
+      }
+
       if (!formValues.invoiceId.trim() || !Number.isFinite(amount)) {
          setSubmitError('Completa el ID de la factura y el monto.')
          setIsSubmitting(false)
@@ -184,9 +189,7 @@ function PaymentsPage() {
       try {
          await createManualPayment({
             invoiceId: manualForm.invoiceId.trim(),
-            method: manualForm.method,
             amount,
-            reference: manualForm.reference.trim() || undefined,
          })
          setIsManualModalOpen(false)
          await reloadPage()
@@ -197,17 +200,24 @@ function PaymentsPage() {
       }
    }
 
-   async function handlePreviewQr(payment: Payment) {
+   async function handleShowQrFromInvoice(invoiceId: string) {
+      if (!invoiceId) {
+         setSubmitError('Ingresa el ID de la factura para ver el QR.')
+         return
+      }
+
       try {
          setIsQrLoading(true)
-         setQrModal({ isOpen: true, imageUrl: '', invoiceId: payment.invoiceId })
-         const blob = await fetchPaymentQrImage(payment.invoiceId)
+         setQrModal({ isOpen: true, imageUrl: '', invoiceId })
+         const blob = await fetchPaymentQrImage(invoiceId)
          const url = URL.createObjectURL(blob)
-         setQrModal({ isOpen: true, imageUrl: url, invoiceId: payment.invoiceId })
+         setQrModal({ isOpen: true, imageUrl: url, invoiceId })
       } catch (error) {
-         setListError((error as { message?: string })?.message || 'No se pudo descargar el QR.')
+         setListError((error as { message?: string })?.message || 'No se pudo cargar el QR.')
+         setQrModal({ isOpen: false, imageUrl: '', invoiceId: '' })
+      } finally {
+         setIsQrLoading(false)
       }
-      setIsQrLoading(false)
    }
 
    return (
@@ -238,16 +248,15 @@ function PaymentsPage() {
             <select name="method" className={styles.select} value={filters.method} onChange={handleFilterChange}>
                <option value="">Metodo: todos</option>
                <option value="CASH">Efectivo</option>
-               <option value="CREDIT_CARD">Tarjeta credito</option>
-               <option value="DEBIT_CARD">Tarjeta debito</option>
+               <option value="CARD">Tarjeta credito</option>
+               <option value="QR">QR</option>
                <option value="TRANSFER">Transferencia</option>
             </select>
             <select name="status" className={styles.select} value={filters.status} onChange={handleFilterChange}>
                <option value="">Estado: todos</option>
-               <option value="PENDING">Pendiente</option>
-               <option value="COMPLETED">Completado</option>
-               <option value="FAILED">Fallido</option>
-               <option value="REFUNDED">Reembolsado</option>
+               <option value="PENDIENTE">Pendiente</option>
+               <option value="APROBADO">Aprobado</option>
+               <option value="RECHAZADO">Rechazado</option>
             </select>
          </div>
 
@@ -301,9 +310,6 @@ function PaymentsPage() {
                                  <Link className={styles.linkButton} to={`/payments/${payment.id}`}>
                                     Ver
                                  </Link>
-                                    <Button type="button" onClick={() => handlePreviewQr(payment)}>
-                                       QR
-                                    </Button>
                               </div>
                            </td>
                         </tr>
@@ -374,8 +380,8 @@ function PaymentsPage() {
                         }
                      >
                         <option value="CASH">Efectivo</option>
-                        <option value="CREDIT_CARD">Tarjeta credito</option>
-                        <option value="DEBIT_CARD">Tarjeta debito</option>
+                        <option value="CARD">Tarjeta credito</option>
+                        <option value="QR">QR</option>
                         <option value="TRANSFER">Transferencia</option>
                      </select>
 
@@ -421,33 +427,6 @@ function PaymentsPage() {
                         placeholder="Monto"
                         required
                      />
-
-                     <label htmlFor="manualMethod">Metodo</label>
-                     <select
-                        id="manualMethod"
-                        name="method"
-                        className={styles.select}
-                        value={manualForm.method}
-                        onChange={(event) =>
-                           setManualForm((prev) => ({ ...prev, method: event.target.value as PaymentMethod }))
-                        }
-                     >
-                        <option value="CASH">Efectivo</option>
-                        <option value="CREDIT_CARD">Tarjeta credito</option>
-                        <option value="DEBIT_CARD">Tarjeta debito</option>
-                        <option value="TRANSFER">Transferencia</option>
-                     </select>
-
-                     <label htmlFor="reference">Referencia</label>
-                     <Input
-                        id="reference"
-                        name="reference"
-                        value={manualForm.reference}
-                        onChange={(event) => setManualForm((prev) => ({ ...prev, reference: event.target.value }))}
-                        placeholder="Referencia de pago"
-                     />
-
-                     {submitError ? <p className={styles.error}>{submitError}</p> : null}
 
                      <div className={styles.modalActions}>
                         <Button type="button" variant="secondary" onClick={closeModal} disabled={isSubmitting}>

@@ -24,7 +24,7 @@ function SalesPage() {
 
    const [filters, setFilters] = useState({
       clientId: '',
-      status: '' as SaleStatus | '',
+      state: '' as SaleStatus | '',
       from: '',
       to: '',
    })
@@ -55,7 +55,7 @@ function SalesPage() {
                page,
                size: pageSize,
                clientId: filters.clientId.trim(),
-               status: filters.status,
+               state: filters.state,
                from: filters.from,
                to: filters.to,
             })
@@ -109,7 +109,7 @@ function SalesPage() {
          page,
          size: pageSize,
          clientId: filters.clientId.trim(),
-         status: filters.status,
+         state: filters.state,
          from: filters.from,
          to: filters.to,
       })
@@ -195,11 +195,11 @@ function SalesPage() {
                placeholder="Cliente ID"
                aria-label="Filtrar por cliente"
             />
-            <select name="status" className={styles.select} value={filters.status} onChange={handleFilterChange}>
+            <select name="state" className={styles.select} value={filters.state} onChange={handleFilterChange}>
                <option value="">Estado: todos</option>
-               <option value="PENDING">Pendiente</option>
-               <option value="CONFIRMED">Confirmada</option>
-               <option value="CANCELLED">Cancelada</option>
+               <option value="ABIERTA">Abierta</option>
+               <option value="CERRADA">Cerrada</option>
+               <option value="ANULADA">Anulada</option>
             </select>
             <Input name="from" type="datetime-local" value={filters.from} onChange={handleFilterChange} />
             <Input name="to" type="datetime-local" value={filters.to} onChange={handleFilterChange} />
@@ -241,7 +241,7 @@ function SalesPage() {
                         <tr key={sale.id}>
                            <td>{sale.id}</td>
                            <td>{sale.clientName || sale.clientId}</td>
-                           <td>{sale.status}</td>
+                           <td>{sale.state}</td>
                            <td>{sale.saleDate ? new Date(sale.saleDate).toLocaleString('es-CO') : '-'}</td>
                            <td>
                               {new Intl.NumberFormat('es-CO', {
@@ -255,12 +255,6 @@ function SalesPage() {
                                  <Link className={styles.linkButton} to={`/sales/${sale.id}`}>
                                     Ver
                                  </Link>
-                                 <Button type="button" variant="secondary" onClick={() => handleConfirmSale(sale)}>
-                                    Confirmar
-                                 </Button>
-                                 <Button type="button" onClick={() => handleCancelSale(sale)}>
-                                    Cancelar
-                                 </Button>
                               </div>
                            </td>
                         </tr>

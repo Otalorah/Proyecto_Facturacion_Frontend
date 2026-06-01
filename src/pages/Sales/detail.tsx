@@ -198,7 +198,7 @@ function SalesDetailPage() {
                   items={[
                      { label: 'Venta', value: sale.id },
                      { label: 'Cliente', value: sale.clientName || sale.clientId },
-                     { label: 'Estado', value: sale.status },
+                     { label: 'Estado', value: sale.state },
                      { label: 'Fecha', value: sale.saleDate ? new Date(sale.saleDate).toLocaleString('es-CO') : '-' },
                      {
                         label: 'Total',
