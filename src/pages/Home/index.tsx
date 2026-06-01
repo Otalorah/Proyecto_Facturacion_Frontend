@@ -36,6 +36,7 @@ function HomePage() {
       name: string
       code: string
       price: string
+      description: string
       stock: string
    }
 
@@ -43,6 +44,7 @@ function HomePage() {
       name: '',
       code: '',
       price: '',
+      description: '',
       stock: '',
    })
 
@@ -123,6 +125,7 @@ function HomePage() {
          name: '',
          code: '',
          price: '',
+         description: '',
          stock: '',
       })
       setSubmitError('')
@@ -136,6 +139,7 @@ function HomePage() {
          name: product.name,
          code: product.code,
          price: String(product.price),
+         description: product.description,
          stock: String(product.stock),
       })
       setSubmitError('')
@@ -178,6 +182,7 @@ function HomePage() {
          name: formValues.name.trim(),
          code: formValues.code.trim(),
          price: Number(formValues.price),
+         description: formValues.description.trim(),
          stock: Number(formValues.stock),
       }
 
@@ -268,6 +273,7 @@ function HomePage() {
                      <th>Nombre</th>
                      <th>Codigo</th>
                      <th>Precio</th>
+                     <th>Descripcion</th>
                      <th>Stock</th>
                      <th>Acciones</th>
                   </tr>
@@ -301,6 +307,7 @@ function HomePage() {
                                  maximumFractionDigits: 0,
                               }).format(product.price)}
                            </td>
+                           <td>{product.description}</td>
                            <td>{product.stock}</td>
                            <td>
                               <div className={styles.actionsCell}>
@@ -381,6 +388,17 @@ function HomePage() {
                         required
                      />
                      {validationErrors.price ? <p className={styles.fieldError}>{validationErrors.price}</p> : null}
+
+                     <label htmlFor="description">Descripcion</label>
+                     <Input
+                         id="description"
+                         name="description"
+                         value={formValues.description}
+                         onChange={handleChangeField}
+                         placeholder="Añada Descripcion Producto"
+                         required
+                     />
+                     {validationErrors.description ? <p className={styles.fieldError}>{validationErrors.description}</p> : null}
 
                      <label htmlFor="stock">Stock</label>
                      <Input

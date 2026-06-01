@@ -11,6 +11,7 @@ export type Product = {
    name: string
    code: string
    price: number
+   description: string
    stock: number
    active?: boolean
 }
@@ -19,6 +20,7 @@ export type ProductInput = {
    name: string
    code: string
    price: number
+   description: string
    stock: number
 }
 
@@ -65,6 +67,7 @@ function mapProduct(raw: Record<string, unknown> | null | undefined): Product {
          name: '',
          code: '',
          price: 0,
+         description: '',
          stock: 0,
          active: undefined,
       }
@@ -75,6 +78,7 @@ function mapProduct(raw: Record<string, unknown> | null | undefined): Product {
       name: String(raw.name ?? raw.nombre ?? ''),
       code: String(raw.code ?? raw.sku ?? ''),
       price: toNumber(raw.price ?? raw.precio, 0),
+      description: String(raw.description ?? raw.descripcion ?? ''),
       stock: toNumber(raw.stock ?? raw.inventory ?? 0, 0),
       active: raw.active === undefined ? undefined : Boolean(raw.active),
    }
@@ -132,6 +136,7 @@ function normalizeProductInput(data: ProductInput): ProductInput {
       name: String(data?.name || '').trim(),
       code: String(data?.code || '').trim(),
       price: toNumber(data?.price, Number.NaN),
+      description: String(data?.description || '').trim(),
       stock: toNumber(data?.stock, Number.NaN),
    }
 }
@@ -154,6 +159,10 @@ function validateProductInput(
 
    if (!Number.isFinite(product.price) || product.price < 0) {
       fieldErrors.price = 'El precio debe ser un numero mayor o igual a 0.'
+   }
+
+   if (!product.description) {
+      fieldErrors.description = "La descripcion es obligatoria"
    }
 
    if (!Number.isInteger(product.stock) || product.stock < 0) {
