@@ -4,18 +4,18 @@ import { extractPage, toNumber, unwrapApiData } from './response-utils'
 export type Client = {
    id: string
    name: string
-   document: string
+   nit: string
    email: string
-   phone: string
+   telephone: string
    address: string
    active?: boolean
 }
 
 export type ClientInput = {
    name: string
-   document: string
+   nit: string
    email?: string
-   phone?: string
+   telephone?: string
    address?: string
 }
 
@@ -36,19 +36,19 @@ function mapClient(raw: Record<string, unknown> | null | undefined): Client {
       return {
          id: '',
          name: '',
-         document: '',
+         nit: '',
          email: '',
-         phone: '',
+         telephone: '',
          address: '',
       }
    }
 
    return {
-      id: String(raw.id ?? raw.clientId ?? ''),
+      id: String(raw.id ?? raw.clientId ?? raw.idClient ?? ''),
       name: String(raw.name ?? raw.nombre ?? ''),
-      document: String(raw.document ?? raw.documentNumber ?? raw.identification ?? raw.cedula ?? ''),
+      nit: String(raw.nit ?? raw.documentNumber ?? raw.identification ?? raw.cedula ?? ''),
       email: String(raw.email ?? ''),
-      phone: String(raw.phone ?? raw.telefono ?? ''),
+      telephone: String(raw.telephone ?? raw.telefono ?? ''),
       address: String(raw.address ?? raw.direccion ?? ''),
       active: raw.active === undefined ? undefined : Boolean(raw.active),
    }

@@ -32,17 +32,17 @@ function ClientsPage() {
 
    type FormValues = {
       name: string
-      document: string
+      nit: string
       email: string
-      phone: string
+      telephone: string
       address: string
    }
 
    const [formValues, setFormValues] = useState<FormValues>({
       name: '',
-      document: '',
+      nit: '',
       email: '',
-      phone: '',
+      telephone: '',
       address: '',
    })
 
@@ -115,9 +115,9 @@ function ClientsPage() {
       setEditingClient(null)
       setFormValues({
          name: '',
-         document: '',
+         nit: '',
          email: '',
-         phone: '',
+         telephone: '',
          address: '',
       })
       setSubmitError('')
@@ -129,9 +129,9 @@ function ClientsPage() {
       setEditingClient(client)
       setFormValues({
          name: client.name,
-         document: client.document,
+         nit: client.nit,
          email: client.email,
-         phone: client.phone,
+         telephone: client.telephone,
          address: client.address,
       })
       setSubmitError('')
@@ -167,9 +167,9 @@ function ClientsPage() {
 
       const payload: ClientInput = {
          name: formValues.name.trim(),
-         document: formValues.document.trim(),
+         nit: formValues.nit.trim(),
          email: formValues.email.trim(),
-         phone: formValues.phone.trim(),
+         telephone: formValues.telephone.trim(),
          address: formValues.address.trim(),
       }
 
@@ -235,7 +235,7 @@ function ClientsPage() {
                <thead>
                   <tr>
                      <th>Nombre</th>
-                     <th>Documento</th>
+                     <th>NIT</th>
                      <th>Correo</th>
                      <th>Telefono</th>
                      <th>Acciones</th>
@@ -262,9 +262,9 @@ function ClientsPage() {
                      ? clients.map((client) => (
                         <tr key={client.id}>
                            <td>{client.name}</td>
-                           <td>{client.document}</td>
+                           <td>{client.nit}</td>
                            <td>{client.email || '-'}</td>
-                           <td>{client.phone || '-'}</td>
+                           <td>{client.telephone || '-'}</td>
                            <td>
                               <div className={styles.actionsCell}>
                                  <Link className={styles.linkButton} to={`/clients/${client.id}`}>
@@ -324,16 +324,16 @@ function ClientsPage() {
                      />
                      {validationErrors.name ? <p className={styles.fieldError}>{validationErrors.name}</p> : null}
 
-                     <label htmlFor="document">Documento</label>
+                     <label htmlFor="nit">NIT</label>
                      <Input
-                        id="document"
-                        name="document"
-                        value={formValues.document}
+                        id="nit"
+                        name="nit"
+                        value={formValues.nit}
                         onChange={handleChangeField}
-                        placeholder="Documento de identidad"
+                        placeholder="NIT"
                         required
                      />
-                     {validationErrors.document ? <p className={styles.fieldError}>{validationErrors.document}</p> : null}
+                     {validationErrors.nit ? <p className={styles.fieldError}>{validationErrors.nit}</p> : null}
 
                      <label htmlFor="email">Correo</label>
                      <Input
@@ -346,15 +346,15 @@ function ClientsPage() {
                      />
                      {validationErrors.email ? <p className={styles.fieldError}>{validationErrors.email}</p> : null}
 
-                     <label htmlFor="phone">Telefono</label>
+                     <label htmlFor="telephone">Telefono</label>
                      <Input
-                        id="phone"
-                        name="phone"
-                        value={formValues.phone}
+                        id="telephone"
+                        name="telephone"
+                        value={formValues.telephone}
                         onChange={handleChangeField}
                         placeholder="Telefono"
                      />
-                     {validationErrors.phone ? <p className={styles.fieldError}>{validationErrors.phone}</p> : null}
+                     {validationErrors.telephone ? <p className={styles.fieldError}>{validationErrors.telephone}</p> : null}
 
                      <label htmlFor="address">Direccion</label>
                      <Input

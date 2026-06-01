@@ -69,9 +69,9 @@ function ClientDetailPage() {
                <InfoList
                   items={[
                      { label: 'Nombre', value: client.name },
-                     { label: 'Documento', value: client.document },
+                     { label: 'NIT', value: client.nit },
                      { label: 'Correo', value: client.email || '-' },
-                     { label: 'Telefono', value: client.phone || '-' },
+                     { label: 'Telefono', value: client.telephone || '-' },
                      { label: 'Direccion', value: client.address || '-' },
                      { label: 'Estado', value: client.active === undefined ? '-' : client.active ? 'Activo' : 'Inactivo' },
                   ]}
@@ -80,14 +80,7 @@ function ClientDetailPage() {
          ) : null}
 
          {!isLoading && !client && !error ? <p className={styles.muted}>No se encontro el cliente.</p> : null}
-
-         <div className={styles.footer}>
-            <Link to="/clients">
-               <Button type="button" variant="secondary">
-                  Volver a clientes
-               </Button>
-            </Link>
-         </div>
+         
       </section>
    )
 }
